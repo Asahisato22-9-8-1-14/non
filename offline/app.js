@@ -1,4 +1,4 @@
-/* Mindloom offline UI. Everything is rendered from local state; there is no
+/* StudyX offline UI. Everything is rendered from local state; there is no
  * network requests, no remote scripts and no dependency on a running server. */
 (function () {
   "use strict";
@@ -768,7 +768,7 @@
       '<h2 class="section-title">Import backup</h2>',
       '<div class="card card-pad">',
       '<form data-form="import-backup">',
-      '<div class="field"><label>Paste a Mindloom backup</label><textarea name="json" required placeholder="{ ... }" style="font-family:ui-monospace,monospace;font-size:12px"></textarea></div>',
+      '<div class="field"><label>Paste a StudyX backup</label><textarea name="json" required placeholder="{ ... }" style="font-family:ui-monospace,monospace;font-size:12px"></textarea></div>',
       '<div class="form-actions"><button class="btn btn-primary" type="submit">' + dangerLabel("import-backup", "Load backup") + '</button></div></form></div>',
       '<h2 class="section-title">Reset</h2>',
       '<div class="card card-pad"><p class="small muted">Restores the starter deck, sample map and welcome note. Export first if you want to keep your work.</p>',
@@ -891,7 +891,7 @@
           var blob = new Blob([document.getElementById("export-json").value], { type: "application/json" });
           var url = URL.createObjectURL(blob);
           var a2 = document.createElement("a");
-          a2.href = url; a2.download = "mindloom-backup.json";
+          a2.href = url; a2.download = "StudyX-backup.json";
           document.body.appendChild(a2); a2.click(); a2.remove();
           setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
           toast("Backup file requested");

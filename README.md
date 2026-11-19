@@ -76,13 +76,14 @@ return `{"ok":true}` (for example a stale placeholder such as a suspended
 Render service), it falls back to the Vercel deployment automatically. Keep the
 secret updated to `https://non-ashen.vercel.app` for clarity.
 
-## Offline APK (no internet needed)
+## Offline APK — StudyX (no internet needed)
 
 `.github/workflows/build-offline-apk.yml` builds a **second APK flavour** from
 `capacitor.offline.config.ts`. It has **no `server.url`**: Capacitor serves the
-files in `offline/` from inside the APK, so the app works in airplane mode. It
-uses app id `com.mindloom.studyapp.offline` / name `Mindloom Offline`, so it can
-be installed alongside the online APK rather than replacing it.
+files in `offline/` from inside the APK, so the app works in airplane mode. It is branded **StudyX**: the launcher name, in-app header, APK file
+`StudyX.apk` and the `StudyX/` folder all use the new name. The internal app id
+stays `com.mindloom.studyapp.offline` on purpose, so upgrading keeps the saved
+`localStorage` data; it can still be installed alongside the online APK.
 
 What is bundled and fully usable offline:
 
@@ -104,7 +105,7 @@ Mobile behaviour:
 
 - **Status bar:** `activity_main.xml` uses `android:fitsSystemWindows="true"` and
   the header reserves `env(safe-area-inset-top)`, so the clock/notification/
-  battery icons never cover the **Mindloom** name. `@capacitor/status-bar` keeps
+  battery icons never cover the **StudyX** name. `@capacitor/status-bar` keeps
   the bar colour and icon contrast in sync with the theme.
 - **Dark mode:** a labelled `☾ Dark` / `☀ Light` button is always in the header,
   plus a second switch on the Guide page — it is no longer buried in Settings.
@@ -120,13 +121,14 @@ Build it locally with:
 npm ci --legacy-peer-deps
 npm run offline:verify
 cp capacitor.offline.config.ts capacitor.config.ts
+node scripts/set-offline-brand.mjs
 npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
 
-Push an `offline-v*` tag (for example `offline-v1.0.0`) to trigger the workflow;
-it publishes a Release and mirrors `downloads/app-debug-offline.apk` into the
-branch for direct download. The `v1.0.x` releases remain the **online** build.
+Push an `offline-v*` tag (for example `offline-v1.0.3`) to trigger the workflow;
+it publishes a Release with the asset `StudyX.apk` and mirrors
+`StudyX/StudyX.apk` into the branch for direct download. The `v1.0.x` releases remain the **online** build.
 
 ## Android APK (Capacitor, online build)
 

@@ -1,6 +1,6 @@
 /* Verifies the offline bundle in CI: the data layer, the study content, and the
  * hard requirement that nothing in the APK's web assets can touch the network. */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -37,7 +37,7 @@ assert.match(read("index.html"), /<script src="app\.js"><\/script>/);
 
 /* Header is always visible below the status bar; theme control is discoverable. */
 assert.match(read("index.html"), /id="back-btn"/);
-assert.match(read("index.html"), /class="brand-name">Mindloom</);
+assert.match(read("index.html"), /class="brand-name">StudyX</);
 assert.match(read("index.html"), /data-action="toggle-theme"/);
 assert.match(read("styles.css"), /safe-area-inset-top/);
 assert.match(read("app.js"), /StatusBar/);
@@ -51,6 +51,21 @@ assert.match(layout, /android:fitsSystemWindows="true"/);
 const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 assert.ok(pkg.dependencies["@capacitor/app"], "missing @capacitor/app (hardware back button)");
 assert.ok(pkg.dependencies["@capacitor/status-bar"], "missing @capacitor/status-bar");
+
+/* StudyX branding: visible app name, native launcher label and the renamed
+ * APK folder/file. The old Mindloom storage key / logic API stays intact so an
+ * upgrade keeps the user's notes, decks and progress. */
+const offlineConfig = readFileSync(join(root, "capacitor.offline.config.ts"), "utf8");
+assert.match(offlineConfig, /appName:\s*"StudyX"/);
+assert.match(read("manifest.json"), /"short_name":\s*"StudyX"/);
+const brandScript = readFileSync(join(root, "scripts/set-offline-brand.mjs"), "utf8");
+assert.match(brandScript, /StudyX/);
+const workflow = readFileSync(join(root, ".github/workflows/build-offline-apk.yml"), "utf8");
+assert.match(workflow, /set-offline-brand\.mjs/);
+assert.match(workflow, /StudyX\.apk/);
+assert.ok(existsSync(join(root, "StudyX/StudyX.apk")), "renamed APK mirror missing");
+assert.ok(!existsSync(join(root, "downloads/app-debug-offline.apk")), "old APK name still present");
+assert.match(read("logic.js"), /mindloom\.offline\.v1/, "storage key must stay stable across the rename");
 
 /* ------------------------- load scripts in a VM -------------------------- */
 const sandbox = { window: {}, console, Date, Math, JSON, URLSearchParams, isFinite, parseInt, parseFloat };
@@ -148,7 +163,7 @@ const json = L.exportJSON(state);
 const imported = L.importJSON(json, T);
 assert.equal(imported.decks.length, state.decks.length);
 assert.equal(imported.progress.theme, "dark");
-assert.throws(() => L.importJSON('{"nope":1}', T), /not a Mindloom export/);
+assert.throws(() => L.importJSON('{"nope":1}', T), /not a StudyX export/);
 assert.throws(() => L.importJSON("not json", T));
 
 const corrupt = makeStorage();

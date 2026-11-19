@@ -46,6 +46,9 @@ jobs:
       - name: Use offline Capacitor config
         run: cp capacitor.offline.config.ts capacitor.config.ts
 
+      - name: Set StudyX launcher name
+        run: node scripts/set-offline-brand.mjs
+
       - name: Sync Capacitor Android project
         run: npx cap sync android
 
@@ -84,7 +87,7 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/gradle-build.log"
 
       - name: Keep a copy of the APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/app-debug.apk"
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/StudyX.apk"
 
       - name: Upload Gradle log on failure
         if: failure()
@@ -97,8 +100,8 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mindloom-offline-apk
-          path: ${{ runner.temp }}/app-debug.apk
+          name: StudyX-offline-apk
+          path: ${{ runner.temp }}/StudyX.apk
           if-no-files-found: error
 
       # Some mobile networks stall on GitHub's release-asset CDN. Mirror into
@@ -111,23 +114,23 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch --depth=1 origin arena/032b4ea2-non
           git checkout --detach FETCH_HEAD
-          mkdir -p downloads
-          cp "$RUNNER_TEMP/app-debug.apk" downloads/app-debug-offline.apk
-          git add -f downloads/app-debug-offline.apk
-          git commit -m "Mirror offline APK into branch for direct download"
+          mkdir -p StudyX
+          cp "$RUNNER_TEMP/StudyX.apk" StudyX/StudyX.apk
+          git add -f StudyX/StudyX.apk
+          git commit -m "Mirror StudyX APK into branch for direct download"
           git push origin HEAD:arena/032b4ea2-non
 
       - name: Publish GitHub Release with offline APK
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ runner.temp }}/app-debug.apk
+          files: ${{ runner.temp }}/StudyX.apk
           generate_release_notes: true
           fail_on_unmatched_files: true
           body: |
-            ## Offline APK — no internet required
+            ## StudyX — offline APK (no internet required)
 
-            Install this build to use Mindloom in airplane mode. All 49 study
+            Install this build to use StudyX in airplane mode. All 49 study
             steps, the GRINDE/SIR widgets, mind maps, notes, flashcards and
             spaced-repetition progress are bundled in the APK and saved on the
             device. It does **not** contact Vercel, Neon or any other server.

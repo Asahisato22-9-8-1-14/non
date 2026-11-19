@@ -1,4 +1,4 @@
-/* Mindloom offline data layer — pure logic, no DOM, no network.
+/* StudyX offline data layer — pure logic, no DOM, no network.
  * Works in a browser (window.MindloomLogic) and in Node (module.exports) so it
  * can be unit-tested without a WebView. All data lives in localStorage. */
 (function (root) {
@@ -338,7 +338,7 @@
   function importJSON(text, now) {
     var parsed = JSON.parse(text);
     if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.decks) || !Array.isArray(parsed.cards)) {
-      throw new Error("That backup is not a Mindloom export.");
+      throw new Error("That backup is not a StudyX export.");
     }
     return normalize(parsed, now);
   }

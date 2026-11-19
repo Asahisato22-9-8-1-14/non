@@ -1,7 +1,7 @@
 {
-  "name": "Mindloom Offline",
-  "short_name": "Mindloom",
-  "description": "Offline study system: 49 steps, mind maps, notes and flashcards.",
+  "name": "StudyX",
+  "short_name": "StudyX",
+  "description": "StudyX offline study system: 49 steps, mind maps, notes and flashcards.",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#fafafa",
