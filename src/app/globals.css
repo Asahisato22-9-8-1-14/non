@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- theme tokens ---------- */
+:root {
+  --paper: #fafafa;
+  --paper-2: #f2f2f3;
+  --card: #ffffff;
+  --ink: #18181b;
+  --ink-2: #52525b;
+  --ink-3: #9a9aa3;
+  --line: #e7e7ea;
+  --accent: #5b5bd6;
+  --accent-2: #4a4ac4;
+  --canvas: #f6f6f7;
+  --canvas-dot: #d9d9de;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #0c0c0e;
+  --paper-2: #17171a;
+  --card: #121215;
+  --ink: #ececee;
+  --ink-2: #a3a3ab;
+  --ink-3: #6c6c75;
+  --line: #26262b;
+  --accent: #8484f2;
+  --accent-2: #9a9af5;
+  --canvas: #0f0f12;
+  --canvas-dot: #2a2a30;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-gold: #e3a33f;
+  --color-mint: #12a372;
+}
+
+@theme {
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-pop: 0 12px 40px -12px rgb(0 0 0 / 0.25);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.3s ease both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.paper-card {
+  @apply rounded-xl border border-line bg-card;
+}
+
+.eyebrow {
+  @apply text-xs font-medium text-ink-3;
+}
+
+.btn-primary {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper transition-opacity duration-150 select-none hover:opacity-85 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+}
+
+.btn-accent {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors duration-150 select-none hover:bg-accent-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent dark:text-[#0c0c0e];
+}
+
+.btn-ghost {
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-line bg-card px-4 py-2 text-sm font-medium text-ink transition-colors duration-150 select-none hover:bg-paper-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+}
+
+.btn-icon {
+  @apply inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-line bg-card text-ink-2 transition-colors duration-150 select-none hover:bg-paper-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+}
+
+.field {
+  @apply w-full rounded-lg border border-line bg-card px-3 py-2 text-sm text-ink transition placeholder:text-ink-3 focus:border-accent focus:ring-2 focus:ring-accent/25 focus:outline-none;
+}
+
+.chip {
+  @apply inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium;
+}
+
+.kbd {
+  @apply inline-flex h-5 min-w-5 items-center justify-center rounded border border-line bg-paper px-1.5 text-[10px] font-semibold text-ink-3;
+}
+
+/* ---------- semantic tags (work in both themes) ---------- */
+.tag-rose { background: color-mix(in srgb, #f43f5e 12%, transparent); color: #e11d48; }
+.tag-amber { background: color-mix(in srgb, #f59e0b 14%, transparent); color: #b45309; }
+.tag-sky { background: color-mix(in srgb, #0ea5e9 13%, transparent); color: #0369a1; }
+.tag-emerald { background: color-mix(in srgb, #10b981 13%, transparent); color: #047857; }
+.tag-violet { background: color-mix(in srgb, #8b5cf6 13%, transparent); color: #6d28d9; }
+.dark .tag-rose { color: #fb7185; }
+.dark .tag-amber { color: #fbbf24; }
+.dark .tag-sky { color: #38bdf8; }
+.dark .tag-emerald { color: #34d399; }
+.dark .tag-violet { color: #a78bfa; }
+
+/* ---------- flashcard flip ---------- */
+.flip-scene { perspective: 1600px; }
+.flip-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+.flip-inner.is-flipped { transform: rotateY(180deg); }
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-face-back { transform: rotateY(180deg); }
+
+/* ---------- mind-map canvas ---------- */
+.canvas-grid {
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle, var(--canvas-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+.map-node { touch-action: none; user-select: none; }
+.map-canvas { touch-action: none; }
