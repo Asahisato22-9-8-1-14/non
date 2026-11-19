@@ -28,6 +28,16 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # Capacitor 8 (and 7) set sourceCompatibility/targetCompatibility = Java 21
+      # in their Android library. Gradle must therefore run on JDK 21; a JDK 17
+      # JVM fails with "invalid source release: 21". Keep the 17 setup above and
+      # switch the active JDK for the Gradle build only.
+      - name: Activate JDK 21 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
@@ -39,14 +49,25 @@ jobs:
       - name: Point Gradle at the Android SDK
         run: |
           SDK_DIR="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "SDK_DIR=$SDK_DIR"
+          java -version
           if [ -n "$SDK_DIR" ]; then
             echo "sdk.dir=$SDK_DIR" > android/local.properties
+            ls "$SDK_DIR/platforms" || true
           fi
           chmod +x android/gradlew
 
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/gradle-build.log"
+
+      - name: Upload Gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: ${{ runner.temp }}/gradle-build.log
+          if-no-files-found: ignore
 
       # Artifact makes the APK downloadable even for manual workflow_dispatch runs.
       - name: Upload APK artifact

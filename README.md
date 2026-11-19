@@ -63,7 +63,9 @@ cd android && ./gradlew assembleDebug
 
 `.github/workflows/build-apk.yml` runs on `v*` tag pushes or manual
 `workflow_dispatch`. It installs with `npm ci --legacy-peer-deps`, sets up Node
-22 + Java 17 (temurin), injects `LIVE_APP_URL` from the repository secret of
+22 + Java 17 (temurin) and activates JDK 21 for Gradle (Capacitor 8's Android
+library compiles with `sourceCompatibility = 21`, so a JDK 17-only build fails),
+injects `LIVE_APP_URL` from the repository secret of
 the same name, runs `npx cap sync android`, builds with
 `./gradlew assembleDebug`, uploads the APK as a workflow artifact, and attaches
 `app-debug.apk` to a GitHub Release via `softprops/action-gh-release@v2`.
