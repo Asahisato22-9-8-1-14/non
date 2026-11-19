@@ -29,15 +29,38 @@ DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/app_db
 Create the tables from the Drizzle schema, then start the dev server:
 
 ```bash
-npx drizzle-kit push
+npm run db:push
 npm run dev
 ```
 
 Open http://localhost:3000. Other scripts: `npm run build`, `npm run lint`,
-`npm run typecheck`.
+`npm run typecheck`, `npm run db:push`.
 
-> `drizzle.config.json` contains a default local connection string used by
-> `drizzle-kit`; update it if your database differs from `DATABASE_URL`.
+`drizzle.config.ts` reads `DATABASE_URL` from `.env` (or the deployment's
+environment), so the same command works locally and on a hosted database.
+
+## Free deployment (Vercel + Neon)
+
+This app needs a Node server (`force-dynamic` pages + API routes) and Postgres,
+so static hosts like GitHub Pages cannot run it. The no-cost combination is
+**Vercel Hobby** for Next.js + **Neon Free** for Postgres; both are free with no
+card, no time limit.
+
+1. Create a free database at [neon.tech](https://neon.tech). Copy its **pooled**
+   connection string (`-pooler` host, `?sslmode=require`).
+2. Import this repository into [vercel.com](https://vercel.com/new) (Hobby plan).
+   Vercel detects Next.js automatically — no build settings needed.
+3. In **Project → Settings → Environment Variables**, add:
+   `DATABASE_URL` = the Neon pooled URL. Apply to Production, Preview and Development.
+4. Deploy. Then create the tables once, from your own machine with `.env` set to
+   the same URL: `npm run db:push`.
+5. Check `https://<your-project>.vercel.app/api/health` returns `{"ok":true}`.
+6. Use that HTTPS URL as the `LIVE_APP_URL` repository secret for the APK build.
+
+Notes: Vercel Hobby is for personal/non-commercial use, and Neon's free compute
+scales to zero after ~5 minutes idle — the first request after a quiet period is
+slower, so the APK may show a short cold-start delay. Use a persistent (paid)
+host if you need always-on behaviour.
 
 ## Android APK (Capacitor)
 
