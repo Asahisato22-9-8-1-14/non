@@ -1,0 +1,9 @@
+{
+  "name": "Mindloom Offline",
+  "short_name": "Mindloom",
+  "description": "Offline study system: 49 steps, mind maps, notes and flashcards.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#5b5bd6"
+}

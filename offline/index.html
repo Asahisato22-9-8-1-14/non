@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#5b5bd6">
+  <meta name="description" content="Mindloom offline study system — 49 steps, mind maps, notes and flashcards, with no internet required.">
+  <title>Mindloom — Offline</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Apply the saved theme before first paint (no flash of the wrong colours).
+    (function () {
+      try {
+        if (localStorage.getItem('ml.theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) { /* storage may be unavailable; light theme still works */ }
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#/dashboard">
+        <span class="brand-dot"></span>
+        <span>Mindloom</span>
+        <span class="offline-badge" title="No internet needed">OFFLINE</span>
+      </a>
+      <nav class="tabs" aria-label="Main navigation">
+        <a href="#/guide" data-nav="guide">Guide</a>
+        <a href="#/dashboard" data-nav="dashboard">Home</a>
+        <a href="#/maps" data-nav="maps">Maps</a>
+        <a href="#/notes" data-nav="notes">Notes</a>
+        <a href="#/decks" data-nav="decks">Cards</a>
+        <a href="#/settings" data-nav="settings">More</a>
+      </nav>
+      <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
+    </div>
+  </header>
+
+  <main id="view" class="view" tabindex="-1"></main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- All scripts are local files bundled inside the APK. No CDNs, no remote
+       fonts, and no network requests: this app works in airplane mode. -->
+  <script src="data.js"></script>
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

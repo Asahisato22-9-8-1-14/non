@@ -9,6 +9,8 @@ with spaced repetition, notes, and an interactive "study system" guide.
 - `src/components/` — editors, pickers, study session UI, and the study-system widgets
 - `src/db/` — Drizzle ORM schema (`src/db/schema.ts`) and connection (`src/db/index.ts`)
 - `src/lib/` — queries, SRS logic, formatting, types, and theme helpers
+- `offline/` — fully self-contained offline app bundled inside the offline APK
+- `scripts/` — offline data generator, offline verification and DOM smoke test
 - `mind-mapping-flashcard-website.zip` — the original uploaded archive, kept for reference
 
 ## Getting started
@@ -34,7 +36,8 @@ npm run dev
 ```
 
 Open http://localhost:3000. Other scripts: `npm run build`, `npm run lint`,
-`npm run typecheck`, `npm run db:push`.
+`npm run typecheck`, `npm run db:push`, `npm run offline:verify`
+(verifies the bundled offline app and asserts it contains no network calls).
 
 `drizzle.config.ts` reads `DATABASE_URL` from `.env` (or the deployment's
 environment), so the same command works locally and on a hosted database.
@@ -73,13 +76,49 @@ return `{"ok":true}` (for example a stale placeholder such as a suspended
 Render service), it falls back to the Vercel deployment automatically. Keep the
 secret updated to `https://non-ashen.vercel.app` for clarity.
 
-## Android APK (Capacitor)
+## Offline APK (no internet needed)
 
-The APK is a thin WebView wrapper around the **deployed HTTPS web app** — an
-Android app cannot run the Next.js server or a local PostgreSQL database, so
-there is no static Next.js export. `capacitor.config.ts` reads `LIVE_APP_URL`
-and falls back to `https://example.com`; `cleartext` is disabled, so the URL
-must be HTTPS.
+`.github/workflows/build-offline-apk.yml` builds a **second APK flavour** from
+`capacitor.offline.config.ts`. It has **no `server.url`**: Capacitor serves the
+files in `offline/` from inside the APK, so the app works in airplane mode.
+
+What is bundled and fully usable offline:
+
+- All 8 phases / 49 study steps (explanations, insights, related links),
+  progress checkboxes, GRINDE framework, SIR review model + timeline,
+  flashcard demo, practice-error analyser and final exam checklist.
+- Mind maps with draggable nodes, notes, flashcard decks and Leitner-box spaced
+  repetition, dashboard stats, dark mode.
+- All data is stored in the WebView's `localStorage`. Settings → Export backup
+  gives you a JSON copy; Import backup restores it. There is no sync with the
+  hosted web app — the two APKs have separate data.
+
+No CDN, no web fonts, no `fetch()`, no service worker and no database:
+`npm run offline:verify` asserts this on every offline build. Regenerate the
+bundled study content from `src/components/system/steps.ts` with
+`npm run offline:data` (Node 22 type-stripping).
+
+Build it locally with:
+
+```bash
+npm ci --legacy-peer-deps
+npm run offline:verify
+cp capacitor.offline.config.ts capacitor.config.ts
+npx cap sync android
+cd android && ./gradlew assembleDebug
+```
+
+Push an `offline-v*` tag (for example `offline-v1.0.0`) to trigger the workflow;
+it publishes a Release and mirrors `downloads/app-debug-offline.apk` into the
+branch for direct download. The `v1.0.x` releases remain the **online** build.
+
+## Android APK (Capacitor, online build)
+
+The default `v*` APK is a thin WebView wrapper around the **deployed HTTPS web
+app** — an Android app cannot run the Next.js server or a local PostgreSQL
+database. `capacitor.config.ts` reads `LIVE_APP_URL` and falls back to the live
+Vercel URL; `cleartext` is disabled, so the URL must be HTTPS. Use the offline
+flavour above if you need the app without a connection.
 
 - `capacitor.config.ts` — app id `com.mindloom.studyapp`, name `Mindloom`, `webDir: public`
 - `android/` — native project generated with `npx cap add android` (config files tracked, build outputs ignored)
@@ -105,8 +144,10 @@ the same name, runs `npx cap sync android`, builds with
 `app-debug.apk` to a GitHub Release via `softprops/action-gh-release@v2`.
 
 Add the secret under **Settings → Secrets and variables → Actions**:
-`LIVE_APP_URL` = your deployed HTTPS URL. Without it the APK points at the
-`https://example.com` fallback.
+`LIVE_APP_URL` = your deployed HTTPS URL. The workflow probes
+`<url>/api/health`; if the secret is missing or points at a dead service, it
+falls back to the live Vercel URL baked into `capacitor.config.ts`. The offline
+APK needs neither this secret nor a database.
 
 ```bash
 git tag v1.0.0

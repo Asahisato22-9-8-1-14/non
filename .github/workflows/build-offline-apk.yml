@@ -1,0 +1,136 @@
+name: Build Offline Android APK
+
+# Separate flavour of the app: the WebView loads HTML/JS/CSS bundled inside the
+# APK, so no Vercel URL, no DATABASE_URL and no internet connection are used.
+on:
+  push:
+    tags:
+      - "offline-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Set up Java 17 (temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Capacitor 8 requires JDK 21 for Gradle even though the runner starts on 17.
+      - name: Activate JDK 21 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Verify offline bundle
+        run: node scripts/verify-offline.mjs
+
+      - name: Use offline Capacitor config
+        run: cp capacitor.offline.config.ts capacitor.config.ts
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Verify bundled offline assets
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const cfg = JSON.parse(fs.readFileSync("android/app/src/main/assets/capacitor.config.json", "utf8"));
+          if (cfg.server && cfg.server.url) {
+            throw new Error("OFFLINE BUILD MUST NOT contain server.url: " + cfg.server.url);
+          }
+          const dir = "android/app/src/main/assets/public";
+          for (const f of ["index.html", "app.js", "data.js", "logic.js", "styles.css", "manifest.json"]) {
+            if (!fs.existsSync(dir + "/" + f)) throw new Error("missing bundled asset " + f);
+          }
+          const html = fs.readFileSync(dir + "/index.html", "utf8");
+          if (/https?:\/\//.test(html)) throw new Error("offline index.html contains a remote URL");
+          console.log("::notice::OK: APK bundles " + fs.readdirSync(dir).length + " local assets; no server.url");
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            "## Offline APK\n- Bundled local assets, no network URL, no LIVE_APP_URL secret needed\n");
+          NODE
+
+      - name: Point Gradle at the Android SDK
+        run: |
+          SDK_DIR="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "SDK_DIR=$SDK_DIR"
+          java -version
+          if [ -n "$SDK_DIR" ]; then
+            echo "sdk.dir=$SDK_DIR" > android/local.properties
+            ls "$SDK_DIR/platforms" || true
+          fi
+          chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/gradle-build.log"
+
+      - name: Keep a copy of the APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/app-debug.apk"
+
+      - name: Upload Gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: offline-gradle-build-log
+          path: ${{ runner.temp }}/gradle-build.log
+          if-no-files-found: ignore
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindloom-offline-apk
+          path: ${{ runner.temp }}/app-debug.apk
+          if-no-files-found: error
+
+      # Some mobile networks stall on GitHub's release-asset CDN. Mirror into
+      # the branch as well so it can be fetched over github.com directly.
+      - name: Mirror offline APK into branch for direct download
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git checkout -- capacitor.config.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --depth=1 origin arena/032b4ea2-non
+          git checkout --detach FETCH_HEAD
+          mkdir -p downloads
+          cp "$RUNNER_TEMP/app-debug.apk" downloads/app-debug-offline.apk
+          git add -f downloads/app-debug-offline.apk
+          git commit -m "Mirror offline APK into branch for direct download"
+          git push origin HEAD:arena/032b4ea2-non
+
+      - name: Publish GitHub Release with offline APK
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ runner.temp }}/app-debug.apk
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          body: |
+            ## Offline APK — no internet required
+
+            Install this build to use Mindloom in airplane mode. All 49 study
+            steps, the GRINDE/SIR widgets, mind maps, notes, flashcards and
+            spaced-repetition progress are bundled in the APK and saved on the
+            device. It does **not** contact Vercel, Neon or any other server.
+
+            This is a debug APK for sideloading/testing. The separate `v1.0.x`
+            releases are the online WebView build.
