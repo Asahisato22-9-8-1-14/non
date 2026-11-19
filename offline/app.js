@@ -27,6 +27,8 @@
     selectedNode: null,
     armed: null,
   };
+  // Screen stack for Android's hardware back button.
+  var nav = { stack: [], lastExitPress: 0 };
 
   /* ------------------------------ content ------------------------------ */
   var GRINDE = [
@@ -106,7 +108,10 @@
     toast._t = setTimeout(function () { el.classList.remove("show"); }, 2300);
   }
   function renderKeep() { ui.keepScroll = true; render(); }
-  function go(hash) { location.hash = hash; }
+  function go(hash) {
+    if (location.hash === hash) { render(); return; }
+    location.hash = hash;        // hashchange pushes onto nav.stack
+  }
   function dueLabel(iso) {
     var diff = new Date(iso).getTime() - now();
     if (diff <= 0) return "due now";
@@ -154,9 +159,84 @@
   }
   function toggleTheme() {
     L.setTheme(state, state.progress.theme === "dark" ? "light" : "dark");
-    document.documentElement.setAttribute("data-theme", state.progress.theme);
     save();
+    applyChrome();
     renderKeep();
+  }
+
+  /* --------------------------- native chrome --------------------------- */
+  function capacitor() { return window.Capacitor || null; }
+  function plugin(name) {
+    var C = capacitor();
+    if (!C) return null;
+    try {
+      if (C.Plugins && C.Plugins[name]) return C.Plugins[name];
+      if (typeof C.registerPlugin === "function") return C.registerPlugin(name);
+    } catch (e) { /* web preview / plugin not registered */ }
+    return null;
+  }
+  function isNative() {
+    var C = capacitor();
+    return !!(C && typeof C.isNativePlatform === "function" && C.isNativePlatform());
+  }
+  var themeMeta = document.querySelector('meta[name="theme-color"]');
+  function applyChrome() {
+    var dark = state.progress.theme === "dark";
+    var bg = dark ? "#0c0c0e" : "#fafafa";
+    document.documentElement.setAttribute("data-theme", state.progress.theme);
+    if (themeMeta) themeMeta.setAttribute("content", bg);
+    var SB = plugin("StatusBar");
+    if (!SB) return;
+    function quiet(p) { if (p && typeof p.catch === "function") p.catch(function () {}); }
+    try {
+      quiet(SB.setOverlaysWebView({ overlay: false }));
+      quiet(SB.setBackgroundColor({ color: bg }));
+      // "DARK" = light icons on a dark bar; "LIGHT" = dark icons on a light bar.
+      quiet(SB.setStyle({ style: dark ? "DARK" : "LIGHT" }));
+    } catch (e) { /* CSS safe-area padding is the fallback */ }
+  }
+
+  /* --------------------------- navigation stack ------------------------ */
+  // The hardware back button must walk the screens the user actually opened,
+  // Instagram-style, instead of closing the app on the first press.
+  function currentHash() { return location.hash || "#/guide"; }
+  function resetTransient() {
+    ui.study = null; ui.selectedNode = null; ui.editCardId = null; ui.armed = null;
+  }
+  function updateBackButton() {
+    var btn = document.getElementById("back-btn");
+    if (btn) btn.hidden = nav.stack.length < 2;
+  }
+  function updateThemeButton() {
+    var btn = document.getElementById("theme-btn");
+    if (!btn) return;
+    var dark = state.progress.theme === "dark";
+    var icon = btn.querySelector(".theme-icon");
+    var label = btn.querySelector(".theme-label");
+    if (icon) icon.textContent = dark ? "☀" : "☾";
+    if (label) label.textContent = dark ? "Light" : "Dark";
+    btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+  }
+  function navBack() {
+    if (nav.stack.length < 2) return false;
+    nav.stack.pop();
+    var target = nav.stack[nav.stack.length - 1];
+    resetTransient();
+    if (location.hash === target) { render(); return true; }
+    // The stack is already popped, so the resulting hashchange sees its new
+    // top as a duplicate and does not push it back on.
+    location.hash = target;
+    render();
+    return true;
+  }
+  function onHashChange() {
+    var h = currentHash();
+    var n = nav.stack.length;
+    if (nav.stack[n - 1] === h) { render(); return; } // duplicate event
+    if (n >= 2 && nav.stack[n - 2] === h) nav.stack.pop();
+    else nav.stack.push(h);
+    resetTransient();
+    render();
   }
 
   /* ------------------------------- render ------------------------------ */
@@ -188,8 +268,8 @@
   }
 
   function afterRender(r) {
-    var btn = document.getElementById("theme-btn");
-    if (btn) btn.textContent = state.progress.theme === "dark" ? "☀" : "☾";
+    updateThemeButton();
+    updateBackButton();
     if (r.name === "maps" && r.parts[1]) drawLines();
     if (r.name === "guide" && r.params.get("step")) {
       var el = document.getElementById("step-" + Number(r.params.get("step")));
@@ -210,6 +290,7 @@
       '<div class="card progress-card">',
       '<div><b class="mono">' + done + " / " + D.total + '</b><div class="small muted">steps completed</div></div>',
       '<div class="progressbar"><span style="width:' + pct + '%"></span></div>',
+      '<button class="btn btn-sm" data-action="toggle-theme">' + (state.progress.theme === "dark" ? "☀ Light mode" : "☾ Dark mode") + '</button>',
       '<button class="btn btn-sm" data-action="reset-progress">' + dangerLabel("reset-progress", "Reset progress") + '</button>',
       '</div>',
     ];
@@ -445,7 +526,7 @@
     var st = L.deckStats(state, id, now());
     var editing = ui.editCardId ? state.cards.find(function (c) { return c.id === ui.editCardId; }) : null;
     var out = [
-      '<a class="back-link" href="#/decks">← All decks</a>',
+      '<a class="back-link" href="#/decks" data-action="nav-back">← All decks</a>',
       '<div class="page-head flex" style="justify-content:space-between">',
       '<div><p class="eyebrow">' + esc(deck.subject) + '</p><h1 class="h1">' + esc(deck.title) + '</h1>',
       '<p class="lede">' + esc(deck.description || "No description yet.") + '</p></div>',
@@ -492,7 +573,7 @@
     }
     var s = ui.study;
     var head = [
-      '<a class="back-link" href="#/decks/' + deckId + '">← ' + esc(deck.title) + '</a>',
+      '<a class="back-link" href="#/decks/' + deckId + '" data-action="nav-back">← ' + esc(deck.title) + '</a>',
       '<div class="page-head"><p class="eyebrow">Study session</p><h1 class="h1">' + esc(deck.title) + '</h1></div>',
     ];
     if (!s.queue.length || s.index >= s.queue.length) {
@@ -561,7 +642,7 @@
     var selected = nodes.find(function (n) { return n.id === ui.selectedNode; }) || null;
     var options = nodes.map(function (n) { return '<option value="' + n.id + '">' + esc(n.label) + '</option>'; }).join("");
     var out = [
-      '<a class="back-link" href="#/maps">← All maps</a>',
+      '<a class="back-link" href="#/maps" data-action="nav-back">← All maps</a>',
       '<div class="page-head flex" style="justify-content:space-between"><div><p class="eyebrow">' + esc(map.subject) + '</p><h1 class="h1">' + esc(map.title) + '</h1></div>',
       '<span class="chip">' + nodes.length + ' nodes</span></div>',
       '<div class="map-canvas" id="map-canvas">',
@@ -703,7 +784,6 @@
   /* ------------------------------ interaction -------------------------- */
   document.addEventListener("click", function (e) {
     var t = e.target;
-    if (t.closest("#theme-btn")) { toggleTheme(); return; }
     if (t.tagName === "INPUT" || t.tagName === "SELECT" || t.tagName === "TEXTAREA") return;
     var el = t.closest("[data-action]");
     if (!el) return;
@@ -712,6 +792,7 @@
     e.preventDefault();
     switch (a) {
       case "toggle-theme": toggleTheme(); break;
+      case "nav-back": navBack(); break;
       case "toggle-open":
         ui.openSteps[el.dataset.id] = !ui.openSteps[el.dataset.id];
         renderKeep();
@@ -944,14 +1025,26 @@
   });
 
   /* -------------------------------- boot ------------------------------- */
-  document.documentElement.setAttribute("data-theme", state.progress.theme);
+  applyChrome();
   if (!location.hash) location.hash = "#/guide";
-  window.addEventListener("hashchange", function () {
-    ui.study = null;
-    ui.selectedNode = null;
-    ui.editCardId = null;
-    ui.armed = null;
-    render();
-  });
+  nav.stack = [currentHash()];
+  window.addEventListener("hashchange", onHashChange);
+
+  var AppPlugin = plugin("App");
+  if (isNative() && AppPlugin && typeof AppPlugin.addListener === "function") {
+    try {
+      AppPlugin.addListener("backButton", function () {
+        if (navBack()) return;
+        var t = now();
+        if (t - nav.lastExitPress < 2000) {
+          if (typeof AppPlugin.exitApp === "function") AppPlugin.exitApp();
+          else window.history.back();
+        } else {
+          nav.lastExitPress = t;
+          toast("Press back again to exit");
+        }
+      });
+    } catch (e) { /* fall back to the WebView's own history */ }
+  }
   render();
 })();

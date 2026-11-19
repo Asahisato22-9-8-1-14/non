@@ -35,6 +35,23 @@ assert.match(read("index.html"), /<script src="data\.js"><\/script>/);
 assert.match(read("index.html"), /<script src="logic\.js"><\/script>/);
 assert.match(read("index.html"), /<script src="app\.js"><\/script>/);
 
+/* Header is always visible below the status bar; theme control is discoverable. */
+assert.match(read("index.html"), /id="back-btn"/);
+assert.match(read("index.html"), /class="brand-name">Mindloom</);
+assert.match(read("index.html"), /data-action="toggle-theme"/);
+assert.match(read("styles.css"), /safe-area-inset-top/);
+assert.match(read("app.js"), /StatusBar/);
+assert.match(read("app.js"), /backButton/);
+assert.match(read("app.js"), /nav-back/);
+
+/* Native side: WebView must be inset below the status bar, and the two plugins
+ * that drive the status bar colours and the hardware back button must exist. */
+const layout = readFileSync(join(root, "android/app/src/main/res/layout/activity_main.xml"), "utf8");
+assert.match(layout, /android:fitsSystemWindows="true"/);
+const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+assert.ok(pkg.dependencies["@capacitor/app"], "missing @capacitor/app (hardware back button)");
+assert.ok(pkg.dependencies["@capacitor/status-bar"], "missing @capacitor/status-bar");
+
 /* ------------------------- load scripts in a VM -------------------------- */
 const sandbox = { window: {}, console, Date, Math, JSON, URLSearchParams, isFinite, parseInt, parseFloat };
 vm.createContext(sandbox);

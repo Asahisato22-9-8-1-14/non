@@ -43,6 +43,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -67,15 +68,19 @@ ul { margin: 0; padding: 0; list-style: none; }
   border-bottom: 1px solid var(--line);
   background: var(--paper);
   backdrop-filter: blur(10px);
+  /* Reserve the status-bar strip. On Android 15+/16 edge-to-edge WebViews the
+     clock, notification and battery icons would otherwise cover the brand. */
+  padding-top: max(24px, env(safe-area-inset-top, 0px));
 }
-.topbar-inner {
-  max-width: 1120px; margin: 0 auto;
-  display: flex; align-items: center; gap: 14px;
-  padding: 10px 16px;
+.topbar-inner { max-width: 1120px; margin: 0 auto; padding: 10px 16px 9px; }
+.topbar-row { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+.brand {
+  display: flex; align-items: center; gap: 9px; color: var(--ink);
+  font-weight: 700; white-space: nowrap; font-size: 16px;
 }
-.brand { display: flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 650; white-space: nowrap; }
 .brand:hover { text-decoration: none; }
-.brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.brand-name { letter-spacing: -0.02em; }
+.brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; }
 .offline-badge {
   font-size: 10px; letter-spacing: .09em; font-weight: 700;
   padding: 2px 6px; border-radius: 5px;
@@ -84,7 +89,7 @@ ul { margin: 0; padding: 0; list-style: none; }
   border: 1px solid var(--line);
   border-color: color-mix(in srgb, var(--mint) 28%, transparent);
 }
-.tabs { display: flex; gap: 2px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.tabs { display: flex; gap: 2px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
 .tabs a {
   padding: 6px 11px; border-radius: 8px; font-size: 14px;
@@ -94,11 +99,24 @@ ul { margin: 0; padding: 0; list-style: none; }
 .tabs a.is-active { color: var(--ink); font-weight: 600; background: var(--paper-2); }
 .icon-btn {
   flex: 0 0 auto; width: 34px; height: 34px; border-radius: 9px;
-  border: 1px solid var(--line); background: var(--card); font-size: 17px; line-height: 1;
+  border: 1px solid var(--line); background: var(--card); font-size: 18px; line-height: 1;
 }
-.view { max-width: 1120px; margin: 0 auto; padding: 26px 16px 80px; }
+.theme-toggle {
+  margin-left: auto; flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 13px; font-weight: 600;
+}
+.theme-toggle:hover { border-color: var(--accent); }
+.theme-icon { font-size: 15px; line-height: 1; }
+.view {
+  max-width: 1120px; margin: 0 auto;
+  padding: 26px 16px calc(80px + env(safe-area-inset-bottom, 0px));
+}
 .toast {
-  position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 14px);
+  position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 14px);
   z-index: 90; padding: 10px 16px; border-radius: 10px;
   background: var(--ink); color: var(--paper); font-size: 14px;
   box-shadow: var(--shadow-pop); opacity: 0; pointer-events: none;
@@ -289,10 +307,12 @@ input[type="checkbox"] { width: auto; accent-color: var(--accent); }
 
 /* ------------------------------ responsive --------------------------- */
 @media (max-width: 640px) {
-  .topbar-inner { flex-wrap: wrap; padding: 9px 12px; gap: 8px; }
-  .tabs { order: 3; width: 100%; margin-left: 0; }
-  .icon-btn { margin-left: auto; }
-  .view { padding: 20px 12px 70px; }
+  .topbar-inner { padding: 9px 12px 8px; }
+  .topbar-row { gap: 8px; }
+  .brand { font-size: 15px; gap: 7px; }
+  .offline-badge { font-size: 9px; }
+  .theme-toggle { padding: 5px 9px; font-size: 12px; }
+  .view { padding: 20px 12px calc(70px + env(safe-area-inset-bottom, 0px)); }
   .step-body { padding-left: 16px; }
   .rating-row { grid-template-columns: repeat(2, 1fr); }
   .card-pad { padding: 15px; }

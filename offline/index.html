@@ -22,11 +22,19 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="#/dashboard">
-        <span class="brand-dot"></span>
-        <span>Mindloom</span>
-        <span class="offline-badge" title="No internet needed">OFFLINE</span>
-      </a>
+      <div class="topbar-row">
+        <button id="back-btn" class="icon-btn" type="button" data-action="nav-back"
+                aria-label="Go back" title="Go back" hidden>←</button>
+        <a class="brand" href="#/dashboard">
+          <span class="brand-dot"></span>
+          <span class="brand-name">Mindloom</span>
+          <span class="offline-badge" title="No internet needed">OFFLINE</span>
+        </a>
+        <button id="theme-btn" class="theme-toggle" type="button" data-action="toggle-theme"
+                aria-label="Switch to dark mode" title="Switch dark / light mode">
+          <span class="theme-icon">☾</span><span class="theme-label">Dark</span>
+        </button>
+      </div>
       <nav class="tabs" aria-label="Main navigation">
         <a href="#/guide" data-nav="guide">Guide</a>
         <a href="#/dashboard" data-nav="dashboard">Home</a>
@@ -35,7 +43,6 @@
         <a href="#/decks" data-nav="decks">Cards</a>
         <a href="#/settings" data-nav="settings">More</a>
       </nav>
-      <button id="theme-btn" class="icon-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
     </div>
   </header>
 

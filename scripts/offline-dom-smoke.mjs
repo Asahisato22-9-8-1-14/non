@@ -111,4 +111,27 @@ go("#/dashboard");
 assert.match(text(), /Offline workspace/);
 assert.match(text(), /Due today/);
 
+/* Header: brand, labelled theme switch, back button */
+assert.equal(doc.querySelector(".brand-name").textContent, "Mindloom");
+assert.ok(doc.querySelector("#theme-btn .theme-label").textContent.length > 0);
+assert.equal(doc.getElementById("toast").textContent !== undefined, true);
+
+/* Back navigation walks the visited screens (Instagram-style) instead of
+   closing the app on the first press. First unwind everything visited above. */
+var guard = 0;
+while (!doc.getElementById("back-btn").hidden && guard++ < 25) {
+  click('[data-action="nav-back"]');
+}
+assert.equal(doc.getElementById("back-btn").hidden, true, "no back button at root");
+go("#/decks");
+assert.equal(doc.getElementById("back-btn").hidden, false, "back button appears after navigating");
+go("#/decks/1");
+assert.match(text(), /Study system essentials/);
+click('[data-action="nav-back"]');
+assert.match(text(), /Flashcard decks/, "back returns to the deck list");
+assert.equal(doc.getElementById("back-btn").hidden, false);
+click('[data-action="nav-back"]');
+assert.match(text(), /Learn like a learning scientist/, "second back returns to the guide");
+assert.equal(doc.getElementById("back-btn").hidden, true, "root has no back button again");
+
 console.log("offline DOM smoke test passed");

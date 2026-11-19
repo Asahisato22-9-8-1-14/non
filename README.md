@@ -100,6 +100,20 @@ No CDN, no web fonts, no `fetch()`, no service worker and no database:
 bundled study content from `src/components/system/steps.ts` with
 `npm run offline:data` (Node 22 type-stripping).
 
+Mobile behaviour:
+
+- **Status bar:** `activity_main.xml` uses `android:fitsSystemWindows="true"` and
+  the header reserves `env(safe-area-inset-top)`, so the clock/notification/
+  battery icons never cover the **Mindloom** name. `@capacitor/status-bar` keeps
+  the bar colour and icon contrast in sync with the theme.
+- **Dark mode:** a labelled `☾ Dark` / `☀ Light` button is always in the header,
+  plus a second switch on the Guide page — it is no longer buried in Settings.
+- **Back button:** `@capacitor/app`'s `backButton` listener drives a navigation
+  stack, so Android's back key walks back through the screens you opened
+  (deck detail → deck list → guide) instead of closing the app. A visible `←`
+  button appears whenever there is something to go back to; at the root,
+  pressing back twice exits.
+
 Build it locally with:
 
 ```bash
