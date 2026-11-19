@@ -80,7 +80,9 @@ secret updated to `https://non-ashen.vercel.app` for clarity.
 
 `.github/workflows/build-offline-apk.yml` builds a **second APK flavour** from
 `capacitor.offline.config.ts`. It has **no `server.url`**: Capacitor serves the
-files in `offline/` from inside the APK, so the app works in airplane mode.
+files in `offline/` from inside the APK, so the app works in airplane mode. It
+uses app id `com.mindloom.studyapp.offline` / name `Mindloom Offline`, so it can
+be installed alongside the online APK rather than replacing it.
 
 What is bundled and fully usable offline:
 
