@@ -46,6 +46,30 @@ jobs:
           LIVE_APP_URL: ${{ secrets.LIVE_APP_URL }}
         run: npx cap sync android
 
+      # The APK's target URL is baked into the native config by `cap sync`.
+      # Report whether the secret actually arrived (never print the URL itself),
+      # so a release pointing at the fallback is visible in the run annotations.
+      - name: Verify live URL injection
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const config = require("./android/app/src/main/assets/capacitor.config.json");
+          const url = (config.server && config.server.url) || "";
+          let message;
+          if (url === "https://example.com") {
+            message = "WARNING: LIVE_APP_URL is unset; APK uses the https://example.com fallback";
+          } else if (/example\.com|your-deployed-app/i.test(url)) {
+            message = "WARNING: LIVE_APP_URL looks like a placeholder; APK will not open your app";
+          } else if (!url.startsWith("https://")) {
+            message = "WARNING: LIVE_APP_URL is not HTTPS, but cleartext is disabled";
+          } else {
+            message = "OK: LIVE_APP_URL injected into the native Capacitor config (HTTPS)";
+          }
+          const level = message.startsWith("OK:") ? "notice" : "warning";
+          console.log(`::${level}::${message}`);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## Capacitor live URL\n- ${message}\n`);
+          NODE
+
       - name: Point Gradle at the Android SDK
         run: |
           SDK_DIR="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
