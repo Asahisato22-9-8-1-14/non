@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   title: "Justin Sung Study System",
   description:
     "An end-to-end study system based on Dr. Justin Sung's methods — plus a connected mind-map, notes and flashcard app.",
+  manifest: "/manifest.json",
+  applicationName: "Mindloom",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#5b5bd6",
 };
 
 // Applies the saved theme before paint (defaults to light on first visit).

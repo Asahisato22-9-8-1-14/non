@@ -1,0 +1,9 @@
+{
+  "name": "Mindloom Study System",
+  "short_name": "Mindloom",
+  "description": "Mind maps, flashcards and an interactive study system.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#5b5bd6"
+}

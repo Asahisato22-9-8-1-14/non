@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mindloom</string>
+    <string name="title_activity_main">Mindloom</string>
+    <string name="package_name">com.mindloom.studyapp</string>
+    <string name="custom_url_scheme">com.mindloom.studyapp</string>
+</resources>

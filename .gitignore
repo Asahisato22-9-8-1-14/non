@@ -34,6 +34,14 @@ google-services.json
 # Android Profiling
 *.hprof
 
+# Capacitor / Android build outputs (android/ config files stay tracked)
+android/app/build/
+android/.gradle/
+android/app/src/main/assets/public/
+android/local.properties
+*.apk
+*.aab
+
 # Node / Next.js
 node_modules/
 .next/
