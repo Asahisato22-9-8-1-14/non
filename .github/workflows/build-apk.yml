@@ -63,7 +63,7 @@ jobs:
           } else if (!url.startsWith("https://")) {
             message = "WARNING: LIVE_APP_URL is not HTTPS, but cleartext is disabled";
           } else {
-            message = "OK: LIVE_APP_URL injected into the native Capacitor config (HTTPS)";
+            message = "OK: APK will load " + url + " (HTTPS, from secret or config fallback)";
           }
           const level = message.startsWith("OK:") ? "notice" : "warning";
           console.log(`::${level}::${message}`);

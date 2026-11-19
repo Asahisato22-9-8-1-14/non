@@ -8,7 +8,10 @@ const config: CapacitorConfig = {
   appName: "Mindloom",
   webDir: "public",
   server: {
-    url: process.env.LIVE_APP_URL || "https://example.com",
+    // Deployed Vercel app. A repository secret can override this at build time,
+    // but GitHub's integration token cannot manage secrets, so the live URL is
+    // also the built-in fallback (otherwise the APK would open example.com).
+    url: process.env.LIVE_APP_URL || "https://non-ashen.vercel.app",
     cleartext: false,
   },
 };

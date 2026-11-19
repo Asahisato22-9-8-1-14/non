@@ -62,6 +62,12 @@ scales to zero after ~5 minutes idle — the first request after a quiet period 
 slower, so the APK may show a short cold-start delay. Use a persistent (paid)
 host if you need always-on behaviour.
 
+Current deployment: **https://non-ashen.vercel.app** (public custom domain;
+Vercel's SSO deployment protection does not apply to custom domains). The
+database tables are created with `npm run db:push -- --force`. This URL is also
+the built-in fallback in `capacitor.config.ts`, so an APK can be built even when
+the `LIVE_APP_URL` repository secret is not configured.
+
 ## Android APK (Capacitor)
 
 The APK is a thin WebView wrapper around the **deployed HTTPS web app** — an
