@@ -68,6 +68,11 @@ database tables are created with `npm run db:push -- --force`. This URL is also
 the built-in fallback in `capacitor.config.ts`, so an APK can be built even when
 the `LIVE_APP_URL` repository secret is not configured.
 
+The APK workflow probes `<url>/api/health`; if the secret is unset or does not
+return `{"ok":true}` (for example a stale placeholder such as a suspended
+Render service), it falls back to the Vercel deployment automatically. Keep the
+secret updated to `https://non-ashen.vercel.app` for clarity.
+
 ## Android APK (Capacitor)
 
 The APK is a thin WebView wrapper around the **deployed HTTPS web app** — an

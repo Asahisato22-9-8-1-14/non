@@ -44,7 +44,20 @@ jobs:
       - name: Sync Capacitor Android project
         env:
           LIVE_APP_URL: ${{ secrets.LIVE_APP_URL }}
-        run: npx cap sync android
+          DEFAULT_LIVE_APP_URL: https://non-ashen.vercel.app
+        run: |
+          # A stale or placeholder secret would bake a dead URL into the APK.
+          # Prefer the secret only when it really serves the deployed app.
+          CANDIDATE="${LIVE_APP_URL:-$DEFAULT_LIVE_APP_URL}"
+          HEALTH="$(curl -fsS --max-time 20 "$CANDIDATE/api/health" 2>/dev/null || true)"
+          if [ -n "$LIVE_APP_URL" ] && [[ "$HEALTH" == *'"ok":true'* ]]; then
+            echo "::notice::Using the LIVE_APP_URL repository secret"
+            export LIVE_APP_URL="$CANDIDATE"
+          else
+            echo "::warning::LIVE_APP_URL secret is unset or does not serve the app; using $DEFAULT_LIVE_APP_URL"
+            export LIVE_APP_URL="$DEFAULT_LIVE_APP_URL"
+          fi
+          npx cap sync android
 
       # The APK's target URL is baked into the native config by `cap sync`.
       # Report whether the secret actually arrived (never print the URL itself),
