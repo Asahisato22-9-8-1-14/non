@@ -111,8 +111,10 @@ go("#/dashboard");
 assert.match(text(), /Offline workspace/);
 assert.match(text(), /Due today/);
 
-/* Header: brand, labelled theme switch, back button */
+/* Header: brand, icon, splash, labelled theme switch, back button */
 assert.equal(doc.querySelector(".brand-name").textContent, "StudyX");
+assert.ok(doc.querySelector(".brand-icon"), "brand icon missing");
+assert.ok(doc.getElementById("studyx-splash"), "splash artwork missing");
 assert.ok(doc.querySelector("#theme-btn .theme-label").textContent.length > 0);
 assert.equal(doc.getElementById("toast").textContent !== undefined, true);
 

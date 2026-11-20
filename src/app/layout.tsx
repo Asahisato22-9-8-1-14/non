@@ -5,17 +5,21 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Justin Sung Study System",
+  title: "StudyX — Study Like a Learning Scientist",
   description:
-    "An end-to-end study system based on Dr. Justin Sung's methods — plus a connected mind-map, notes and flashcard app.",
+    "StudyX: an offline-first study system with 49 connected steps, mind maps, notes, flashcards and spaced repetition.",
   manifest: "/manifest.json",
-  applicationName: "Mindloom",
+  applicationName: "StudyX",
+  icons: {
+    icon: "/study-x-icon.png",
+    apple: "/study-x-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#5b5bd6",
+  themeColor: "#efe0ad",
 };
 
 // Applies the saved theme before paint (defaults to light on first visit).

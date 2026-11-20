@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Android 15+ forces edge-to-edge for apps targeting SDK 35+. Opting out
-         keeps the WebView (and the Mindloom header) below the status bar, so the
+         keeps the WebView (and the StudyX header) below the status bar, so the
          clock / notification / battery icons never cover the app name. -->
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">

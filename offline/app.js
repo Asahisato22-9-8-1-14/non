@@ -182,7 +182,7 @@
   var themeMeta = document.querySelector('meta[name="theme-color"]');
   function applyChrome() {
     var dark = state.progress.theme === "dark";
-    var bg = dark ? "#0c0c0e" : "#fafafa";
+    var bg = dark ? "#17140e" : "#efe0ad";
     document.documentElement.setAttribute("data-theme", state.progress.theme);
     if (themeMeta) themeMeta.setAttribute("content", bg);
     var SB = plugin("StatusBar");

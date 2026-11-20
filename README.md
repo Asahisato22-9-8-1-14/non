@@ -1,7 +1,36 @@
-# non
+<p align="center">
+  <img src="StudyX/study-x-icon.png" alt="StudyX icon — oak branch, lanterns and quill" width="150" />
+</p>
+<p align="center">
+  <img src="StudyX/study-x-artwork.png" alt="Full StudyX parchment artwork" width="220" />
+</p>
 
-A Next.js (App Router) + PostgreSQL study app combining mind maps, flashcard decks
-with spaced repetition, notes, and an interactive "study system" guide.
+# StudyX
+
+**Offline Android study app** with a parchment / oak-green / lantern-gold / ink
+interface, the supplied quill-and-lantern launcher icon, and a matching splash
+screen. Everything runs inside the APK — no Wi-Fi, login, server or database.
+
+## Repository description (GitHub About)
+
+StudyX 🪶 is a fully offline Android study app: the 49-step Justin Sung Study
+System (8 phases, GRINDE framework, SIR review model + timeline, flashcard demo,
+practice-error analyser and exam checklist), draggable mind maps, notes,
+flashcard decks with Leitner-box spaced repetition, a dashboard, progress ticks,
+dark/light parchment themes, a visible dark-mode switch, Instagram-style Android
+back navigation, correct active-tab highlighting, status-bar-safe header, and
+JSON backup/restore. All data is saved in the WebView's local storage; there is
+no sync with the hosted web app. The launcher icon and splash use the supplied
+oak/lantern/quill artwork. Install the sideload/debug APK from Releases
+(`StudyX.apk`); enable "Install unknown apps" and choose "Install anyway".
+Full source, the original ZIP snapshot, icon, artwork, QR and build workflow are
+in this repository. No internet, Vercel, Neon, CDN, web font or `fetch()` is
+used by the offline APK.
+
+> The GitHub integration token here can push code/releases but cannot edit
+> repository settings. `StudyX/GITHUB_DESCRIPTION.md` contains the exact text to
+> paste into GitHub → Settings → General → About → Description; the icon is
+> rendered above and in the Release notes.
 
 ## What's here
 
@@ -10,6 +39,10 @@ with spaced repetition, notes, and an interactive "study system" guide.
 - `src/db/` — Drizzle ORM schema (`src/db/schema.ts`) and connection (`src/db/index.ts`)
 - `src/lib/` — queries, SRS logic, formatting, types, and theme helpers
 - `offline/` — fully self-contained offline app bundled inside the offline APK
+- `StudyX/study-x-icon.png` — launcher / favicon / header icon
+- `StudyX/study-x-artwork.png` — full parchment artwork and splash source
+- `offline/studyx-art.jpg` — compressed local background bundled in the APK
+- `public/study-x-icon.png` — favicon for the hosted Next.js web app
 - `scripts/` — offline data generator, offline verification and DOM smoke test
 - `mind-mapping-flashcard-website.zip` — the original uploaded archive, kept for reference
 
@@ -79,11 +112,13 @@ secret updated to `https://non-ashen.vercel.app` for clarity.
 ## Offline APK — StudyX (no internet needed)
 
 The mislabelled `study x.json` attachment is a ZIP, saved as
-`StudyX/study-x-source.zip`; `StudyX/interface-reference.jpg` is the UI
-reference from the screenshot. That source snapshot is a Next.js app with
-AI/chat API routes and a database, so it is kept as reference material — the
-offline APK deliberately keeps the serverless StudyX interface shown in the
-screenshot.
+`StudyX/study-x-source.zip`. That source snapshot is a Next.js app with AI/chat
+API routes and a database, so it is kept as reference material. The offline APK
+uses the supplied `StudyX/study-x-artwork.png` as its visual direction:
+parchment paper, oak canopy, three hanging lanterns, an ink-circle quill emblem
+and serif "Study X" lettering. The same square crop is the launcher icon,
+favicon and header badge; the full artwork is the native splash and a subtle
+in-app background.
 
 `.github/workflows/build-offline-apk.yml` builds a **second APK flavour** from
 `capacitor.offline.config.ts`. It has **no `server.url`**: Capacitor serves the
@@ -112,7 +147,7 @@ Mobile behaviour:
 
 - **Status bar:** `activity_main.xml` uses `android:fitsSystemWindows="true"` and
   the header reserves `env(safe-area-inset-top)`, so the clock/notification/
-  battery icons never cover the **StudyX** name. `@capacitor/status-bar` keeps
+  battery icons never cover the **StudyX** brand and icon. `@capacitor/status-bar` keeps
   the bar colour and icon contrast in sync with the theme.
 - **Dark mode:** a labelled `☾ Dark` / `☀ Light` button is always in the header,
   plus a second switch on the Guide page — it is no longer buried in Settings.
@@ -137,7 +172,7 @@ npx cap sync android
 cd android && ./gradlew assembleDebug
 ```
 
-Push an `offline-v*` tag (for example `offline-v1.0.3`) to trigger the workflow;
+Push an `offline-v*` tag (for example `offline-v1.0.5`) to trigger the workflow;
 it publishes a Release with the asset `StudyX.apk` and mirrors
 `StudyX/StudyX.apk` into the branch for direct download. The `v1.0.x` releases remain the **online** build.
 
@@ -149,7 +184,7 @@ database. `capacitor.config.ts` reads `LIVE_APP_URL` and falls back to the live
 Vercel URL; `cleartext` is disabled, so the URL must be HTTPS. Use the offline
 flavour above if you need the app without a connection.
 
-- `capacitor.config.ts` — app id `com.mindloom.studyapp`, name `Mindloom`, `webDir: public`
+- `capacitor.config.ts` — app id `com.mindloom.studyapp`, name `StudyX`, `webDir: public`
 - `android/` — native project generated with `npx cap add android` (config files tracked, build outputs ignored)
 - `public/manifest.json` — web app manifest (linked from `src/app/layout.tsx`)
 

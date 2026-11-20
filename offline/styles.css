@@ -1,44 +1,45 @@
-/* StudyX offline — self-contained styles. No web fonts, no imports, no URLs. */
+/* StudyX offline — parchment, oak green, lantern gold and ink. No web fonts,
+   no imports, no remote URLs: every asset is bundled inside the APK. */
 :root {
-  --paper: #fafafa;
-  --paper-2: #f1f1f3;
-  --card: #ffffff;
-  --ink: #18181b;
-  --ink-2: #52525b;
-  --ink-3: #8b8b95;
-  --line: #e5e5e9;
-  --accent: #5b5bd6;
-  --accent-soft: rgba(91, 91, 214, 0.1);
-  --mint: #12a372;
-  --rose: #d9505f;
-  --amber: #d99020;
-  --sky: #3b82f6;
-  --violet: #8b5cf6;
-  --canvas: #f6f6f8;
-  --canvas-dot: #dcdce2;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-pop: 0 14px 40px -14px rgba(0, 0, 0, 0.24);
+  --paper: #f6efd8;
+  --paper-2: #ecdfb8;
+  --card: #fffaf0;
+  --ink: #2e2618;
+  --ink-2: #5f543d;
+  --ink-3: #8b7b58;
+  --line: #d6c493;
+  --accent: #7a5a25;
+  --accent-soft: rgba(122, 90, 37, 0.12);
+  --mint: #3f6b45;
+  --rose: #a04b3d;
+  --amber: #b07a25;
+  --sky: #3f6b8a;
+  --violet: #6a4f7a;
+  --canvas: #eadcb2;
+  --canvas-dot: #d3c092;
+  --shadow: 0 1px 2px rgba(60, 45, 20, 0.10);
+  --shadow-pop: 0 14px 40px -14px rgba(60, 45, 20, 0.35);
   color-scheme: light;
 }
 [data-theme="dark"] {
-  --paper: #0c0c0e;
-  --paper-2: #17171b;
-  --card: #141418;
-  --ink: #ededf0;
-  --ink-2: #a8a8b2;
-  --ink-3: #71717c;
-  --line: #292930;
-  --accent: #9292f2;
-  --accent-soft: rgba(146, 146, 242, 0.14);
-  --mint: #35c992;
-  --rose: #ef7b88;
-  --amber: #eab354;
-  --sky: #72a7fb;
-  --violet: #ab8cf8;
-  --canvas: #101014;
-  --canvas-dot: #2b2b33;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-pop: 0 14px 40px -14px rgba(0, 0, 0, 0.7);
+  --paper: #17140e;
+  --paper-2: #241f14;
+  --card: #1e1a12;
+  --ink: #f1e7c8;
+  --ink-2: #c9ba91;
+  --ink-3: #968864;
+  --line: #3a3322;
+  --accent: #d8b45c;
+  --accent-soft: rgba(216, 180, 92, 0.15);
+  --mint: #8fbd7a;
+  --rose: #e39183;
+  --amber: #e6bd68;
+  --sky: #8ab6d6;
+  --violet: #b99cd0;
+  --canvas: #13100a;
+  --canvas-dot: #2c2618;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 14px 40px -14px rgba(0, 0, 0, 0.8);
   color-scheme: dark;
 }
 
@@ -47,12 +48,27 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
+  min-height: 100vh;
+  position: relative;
   background: var(--paper);
   color: var(--ink);
-  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font: 16px/1.65 Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color .2s ease, color .2s ease;
 }
+/* The supplied StudyX artwork is a local, low-contrast parchment backdrop. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0;
+  background: url("studyx-art.jpg") center / cover no-repeat fixed;
+  opacity: .16; pointer-events: none;
+}
+[data-theme="dark"] body::before { opacity: .09; filter: sepia(.35) brightness(.62); }
+h1, h2, h3, h4 { font-family: Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+.card, .list, .panel, .topbar { background: color-mix(in srgb, var(--card) 94%, transparent); backdrop-filter: blur(4px); }
+input, select, textarea, .map-canvas, .note-editor textarea {
+  background: color-mix(in srgb, var(--paper) 90%, transparent);
+}
+.view { position: relative; z-index: 1; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -61,6 +77,20 @@ h1, h2, h3, h4 { margin: 0; line-height: 1.25; font-weight: 650; letter-spacing:
 p { margin: 0; }
 ul { margin: 0; padding: 0; list-style: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ------------------------------- splash ------------------------------ */
+.splash {
+  position: fixed; inset: 0; z-index: 200; pointer-events: none;
+  background: #efe0ad url("studyx-art.jpg") center / cover no-repeat;
+  animation: studyxSplash 1.65s ease forwards;
+}
+@keyframes studyxSplash {
+  0%, 62% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash { animation-duration: .01s; }
+}
 
 /* ------------------------------- shell ------------------------------- */
 .topbar {
@@ -76,11 +106,16 @@ ul { margin: 0; padding: 0; list-style: none; }
 .topbar-row { display: flex; align-items: center; gap: 10px; min-height: 34px; }
 .brand {
   display: flex; align-items: center; gap: 9px; color: var(--ink);
-  font-weight: 700; white-space: nowrap; font-size: 16px;
+  font-weight: 700; white-space: nowrap; font-size: 17px;
 }
+.brand-name { font-style: italic; font-family: Georgia, "Times New Roman", serif; }
 .brand:hover { text-decoration: none; }
 .brand-name { letter-spacing: -0.02em; }
-.brand-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; }
+.brand-icon {
+  width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--line); flex: 0 0 auto;
+  box-shadow: 0 1px 3px rgba(60, 45, 20, .18);
+}
 .offline-badge {
   font-size: 10px; letter-spacing: .09em; font-weight: 700;
   padding: 2px 6px; border-radius: 5px;
@@ -166,10 +201,10 @@ ul { margin: 0; padding: 0; list-style: none; }
   text-decoration: none;
 }
 .btn:hover { text-decoration: none; border-color: var(--ink-3); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fffaf0; }
 .btn-primary:hover { border-color: var(--accent); filter: brightness(1.08); }
-[data-theme="dark"] .btn-primary, [data-theme="dark"] .pill.is-active { color: #101014; }
-[data-theme="dark"] .pill.is-active b { color: #101014; }
+[data-theme="dark"] .btn-primary, [data-theme="dark"] .pill.is-active { color: #17140e; }
+[data-theme="dark"] .pill.is-active b { color: #17140e; }
 .btn-ghost { background: transparent; }
 .btn-danger { color: var(--rose); border-color: var(--line); border-color: color-mix(in srgb, var(--rose) 35%, var(--line)); }
 .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
@@ -320,6 +355,7 @@ input[type="checkbox"] { width: auto; accent-color: var(--accent); }
   .topbar-inner { padding: 9px 12px 8px; }
   .topbar-row { gap: 8px; }
   .brand { font-size: 15px; gap: 7px; }
+  .brand-icon { width: 25px; height: 25px; }
   .offline-badge { font-size: 9px; }
   .theme-toggle { padding: 5px 9px; font-size: 12px; }
   .view { padding: 20px 12px calc(70px + env(safe-area-inset-bottom, 0px)); }

@@ -5,7 +5,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // so we point Capacitor at the live URL instead of doing a static export.
 const config: CapacitorConfig = {
   appId: "com.mindloom.studyapp",
-  appName: "Mindloom",
+  appName: "StudyX",
   webDir: "public",
   server: {
     // Deployed Vercel app. A repository secret can override this at build time,

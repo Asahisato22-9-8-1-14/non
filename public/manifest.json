@@ -1,9 +1,16 @@
 {
-  "name": "Mindloom Study System",
-  "short_name": "Mindloom",
-  "description": "Mind maps, flashcards and an interactive study system.",
+  "name": "StudyX \u2014 Offline Study System",
+  "short_name": "StudyX",
+  "description": "49-step study system, mind maps, notes, flashcards and spaced repetition.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#fafafa",
-  "theme_color": "#5b5bd6"
+  "background_color": "#efe0ad",
+  "theme_color": "#7a5a25",
+  "icons": [
+    {
+      "src": "/study-x-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }

@@ -1,7 +1,7 @@
-/* Offline builds are branded StudyX. The online WebView APK keeps its own
- * Mindloom launcher name, so this patch runs only in the offline workflow (and
- * in the local offline build steps in README.md). The internal app id is NOT
- * changed: that keeps the WebView's localStorage data across an upgrade. */
+/* All builds are branded StudyX. This normalises the launcher strings for the
+ * offline workflow (and the local offline build steps in README.md). The
+ * internal app id is NOT changed: that keeps the WebView's localStorage data
+ * across an upgrade. */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

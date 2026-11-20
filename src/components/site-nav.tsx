@@ -19,8 +19,8 @@ export function SiteNav() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-paper/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-accent" />
-          <span className="text-[15px] font-semibold tracking-tight">Mindloom</span>
+          <span className="site-icon" aria-hidden="true" />
+          <span className="text-[15px] font-semibold tracking-tight">StudyX</span>
         </Link>
 
         <div className="flex items-center gap-1">

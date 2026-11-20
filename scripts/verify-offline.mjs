@@ -11,7 +11,7 @@ const offline = join(root, "offline");
 const read = (f) => readFileSync(join(offline, f), "utf8");
 
 const files = readdirSync(offline).filter((f) => statSync(join(offline, f)).isFile()).sort();
-const required = ["app.js", "data.js", "index.html", "logic.js", "manifest.json", "styles.css"];
+const required = ["app.js", "data.js", "index.html", "logic.js", "manifest.json", "styles.css", "studyx-art.jpg", "studyx-icon.png"];
 required.forEach((f) => assert.ok(files.includes(f), `missing offline/${f}`));
 
 /* ---------------------- no network in the web assets --------------------- */
@@ -25,7 +25,8 @@ const networkPatterns = [
   /url\(\s*["']?https?:/i,
   /https?:\/\/(?!www\.w3\.org\/2000\/svg)/i,
 ];
-for (const f of files) {
+const textFiles = files.filter((f) => /\.(html?|js|css|json)$/i.test(f));
+for (const f of textFiles) {
   const text = read(f);
   for (const re of networkPatterns) {
     assert.ok(!re.test(text), `offline/${f} contains a network reference: ${re}`);
@@ -39,7 +40,13 @@ assert.match(read("index.html"), /<script src="app\.js"><\/script>/);
 assert.match(read("index.html"), /id="back-btn"/);
 assert.match(read("index.html"), /class="brand-name">StudyX</);
 assert.match(read("index.html"), /data-action="toggle-theme"/);
+assert.match(read("index.html"), /rel="icon"[^>]+studyx-icon\.png/);
+assert.match(read("index.html"), /id="studyx-splash"/);
+assert.match(read("index.html"), /class="brand-icon"/);
 assert.match(read("styles.css"), /safe-area-inset-top/);
+assert.match(read("styles.css"), /studyx-art\.jpg/);
+assert.match(read("styles.css"), /@keyframes studyxSplash/);
+assert.match(read("styles.css"), /\.brand-icon/);
 assert.match(read("styles.css"), /@media \(hover: hover\)/);
 assert.match(read("styles.css"), /\.tabs a\.is-active/);
 assert.match(read("app.js"), /aria-current/);
@@ -61,15 +68,43 @@ assert.ok(pkg.dependencies["@capacitor/status-bar"], "missing @capacitor/status-
  * upgrade keeps the user's notes, decks and progress. */
 const offlineConfig = readFileSync(join(root, "capacitor.offline.config.ts"), "utf8");
 assert.match(offlineConfig, /appName:\s*"StudyX"/);
-assert.match(read("manifest.json"), /"short_name":\s*"StudyX"/);
+const offManifest = JSON.parse(read("manifest.json"));
+assert.equal(offManifest.short_name, "StudyX");
+assert.ok(offManifest.icons && offManifest.icons.some((i) => i.src === "studyx-icon.png"));
 const brandScript = readFileSync(join(root, "scripts/set-offline-brand.mjs"), "utf8");
 assert.match(brandScript, /StudyX/);
 const workflow = readFileSync(join(root, ".github/workflows/build-offline-apk.yml"), "utf8");
 assert.match(workflow, /set-offline-brand\.mjs/);
 assert.match(workflow, /StudyX\.apk/);
+assert.match(workflow, /study-x-icon\.png/);
+const layoutTs = readFileSync(join(root, "src/app/layout.tsx"), "utf8");
+assert.match(layoutTs, /applicationName:\s*"StudyX"/);
+const onlineCap = readFileSync(join(root, "capacitor.config.ts"), "utf8");
+assert.match(onlineCap, /appName:\s*"StudyX"/);
+const appStrings = readFileSync(join(root, "android/app/src/main/res/values/strings.xml"), "utf8");
+assert.match(appStrings, /<string name="app_name">StudyX<\/string>/);
+const studyReadme = readFileSync(join(root, "StudyX/README.md"), "utf8");
+assert.match(studyReadme, /study-x-icon\.png/);
 assert.ok(existsSync(join(root, "StudyX/StudyX.apk")), "renamed APK mirror missing");
 assert.ok(existsSync(join(root, "StudyX/study-x-source.zip")), "attached source ZIP missing");
 assert.ok(existsSync(join(root, "StudyX/interface-reference.jpg")), "interface reference missing");
+assert.ok(existsSync(join(root, "StudyX/study-x-icon.png")), "StudyX launcher icon missing");
+assert.ok(existsSync(join(root, "StudyX/study-x-artwork.png")), "StudyX artwork missing");
+const ghDescPath = join(root, "StudyX/GITHUB_DESCRIPTION.md");
+assert.ok(existsSync(ghDescPath), "GitHub description file missing");
+const ghDesc = readFileSync(ghDescPath, "utf8");
+assert.match(ghDesc, /49-step Justin Sung system/);
+assert.match(ghDesc, /study-x-icon\.png/);
+assert.ok(existsSync(join(root, "public/study-x-icon.png")), "web favicon missing");
+assert.ok(existsSync(join(root, "android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png")), "Android launcher icon missing");
+const iconBg = readFileSync(join(root, "android/app/src/main/res/values/ic_launcher_background.xml"), "utf8");
+assert.match(iconBg, /#E8D9A8/);
+const webManifest = JSON.parse(readFileSync(join(root, "public/manifest.json"), "utf8"));
+assert.equal(webManifest.short_name, "StudyX");
+assert.ok(webManifest.icons && webManifest.icons.some((i) => i.src === "/study-x-icon.png"));
+const rootReadme = readFileSync(join(root, "README.md"), "utf8");
+assert.match(rootReadme, /study-x-icon\.png/);
+assert.match(rootReadme, /Repository description/i);
 assert.ok(!existsSync(join(root, "downloads/app-debug-offline.apk")), "old APK name still present");
 assert.match(read("logic.js"), /mindloom\.offline\.v1/, "storage key must stay stable across the rename");
 

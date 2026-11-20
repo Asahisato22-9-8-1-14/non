@@ -1,30 +1,61 @@
+<p align="center">
+  <img src="study-x-icon.png" alt="StudyX icon" width="150" />
+</p>
+<p align="center">
+  <img src="study-x-artwork.png" alt="StudyX parchment artwork" width="220" />
+</p>
+
 # StudyX
 
-`StudyX.apk` is the offline Android build: all 49 study steps, mind maps, notes,
-flashcards and spaced-repetition progress are bundled inside the APK. It needs
-no internet, no Vercel URL and no database.
+**Fully offline Android study app.** `StudyX.apk` opens and works in airplane
+mode: no Vercel URL, no Neon/PostgreSQL, no login, no CDN, no web font, no
+`fetch()` and no service worker.
 
-Direct download from this branch:
+## App information (also mirrored in the GitHub repository description)
+
+- **Study system:** 8 phases / 49 connected Justin Sung steps with explanations,
+  insights, related links and progress checkboxes.
+- **Widgets:** GRINDE framework, SIR review model + timeline, flashcard demo,
+  practice-error analyser and final exam checklist.
+- **Create & review:** draggable mind maps, notes, flashcard decks and
+  Leitner-box spaced repetition, dashboard stats.
+- **Mobile UX:** parchment / oak / lantern-gold / ink theme with the supplied
+  quill icon, full-artwork splash, dark/light mode, status-bar-safe header,
+  labelled `Dark / Light` button, Instagram-style Android back stack, single
+  correct active tab, and press-back-twice to exit.
+- **Data:** all decks, cards, maps, notes and progress live in the WebView's
+  `localStorage`. Settings → Export backup / Import backup gives a JSON copy.
+  Data does **not** sync with the hosted web app. Installing over the previous
+  offline build keeps the data because the internal app id is unchanged.
+- **Build:** Capacitor 8, `webDir: "offline"`, no `server.url`; debug-signed
+  sideload APK, not a Play Store release.
+
+## Files
+
+- `StudyX.apk` — current offline APK.
+- `study-x-icon.png` — square launcher / favicon / header icon.
+- `study-x-artwork.png` — full supplied poster, used for splash and theme.
+- `study-x-source.zip` — the user-supplied Next.js source ZIP (reference only;
+  its AI/chat pages need a server + database, so they are not in the APK).
+- `interface-reference.jpg` — earlier UI screenshot reference.
+- `GITHUB_DESCRIPTION.md` — exact GitHub About text, icon/social-preview note,
+  homepage and topics (the integration token cannot edit repo settings here).
+
+## Download
+
+Direct mirror:
 https://github.com/Asahisato22-9-8-1-14/non/raw/refs/heads/arena/032b4ea2-non/StudyX/StudyX.apk
 
-The launcher name, in-app header, APK file and folder are all **StudyX**. The
-internal Android app id is unchanged, so installing this over the previous
-offline build keeps your saved notes, decks and progress.
-
-Full notes: `../exports/StudyX/README.md` (local export folder) or
-https://github.com/Asahisato22-9-8-1-14/non/releases/tag/offline-v1.0.4
+Current release:
+https://github.com/Asahisato22-9-8-1-14/non/releases/tag/offline-v1.0.5
 
 GitHub currently resolves the old `vihanpoojary4392/non` links to
-`Asahisato22-9-8-1-14/non`; the URLs above use the current owner.
+`Asahisato22-9-8-1-14/non`.
 
-## Reference files
+## Install
 
-- `study-x-source.zip` — the attachment named `study x.json` is actually a ZIP.
-  It is a newer Next.js source snapshot with AI/chat + settings pages that need
-  a server, database and API keys. It is saved here for reference; it is **not**
-  bundled into the offline APK.
-- `interface-reference.jpg` — the screenshot of the StudyX interface to keep
-  (dark header, OFFLINE badge, Guide/Home/Maps/Notes/Cards/More tabs).
+Enable **Install unknown apps**, tap the APK and choose **Install anyway** if
+Play Protect warns about the debug signature.
 
-The offline APK keeps that interface and uses only the self-contained files in
-`offline/`.
+Push an `offline-v*` tag to rebuild; the `v*` workflow still builds the online
+WebView APK.
