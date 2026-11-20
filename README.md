@@ -46,6 +46,49 @@ used by the offline APK.
 - `scripts/` — offline data generator, offline verification and DOM smoke test
 - `mind-mapping-flashcard-website.zip` — the original uploaded archive, kept for reference
 
+## AI chat + API connection (hosted app)
+
+The hosted app now ships the AI assistant from your source ZIP, but it does
+**not** come with any key or provider pre-connected — a key cannot be invented
+or shipped safely in a public repo. Wire yours in ~60 seconds:
+
+1. Open `https://non-ashen.vercel.app/settings` (or **Settings** icon in the
+   hosted app header).
+2. Pick a provider preset — **OpenAI**, **Anthropic Claude**, **Google Gemini**,
+   **OpenRouter**, **Groq** or **Custom (any OpenAI-compatible URL)**.
+3. Paste your own API key. The base URL and model are pre-filled per provider;
+   for a proxy/self-hosted endpoint choose **Custom** and paste the full base
+   URL, e.g. `https://my-proxy.example.com/v1`.
+4. Press **Save**, then **Test connection** — it sends one `OK` round-trip to
+   `/chat/completions` and reports the exact provider error if anything fails.
+5. Open **AI Chat** in the nav: streaming replies, Markdown, conversation list,
+   attach a note or mind map as context, "Explain simply / Quiz me / Make
+   flashcards / Build a study plan" shortcuts.
+
+How the link is stored: the key is saved in Postgres (`app_settings` table) and
+read only by server routes (`/api/settings/ai`, `/api/ai/test`,
+`/api/chat/...`); it is never exposed to the browser or to the offline APK.
+`GET /api/settings/ai` returns only a masked preview.
+
+**Server-side alternative (no clicking):** set these in Vercel → Project →
+Settings → Environment Variables (Production) and redeploy:
+
+| Key | Example | Notes |
+| --- | --- | --- |
+| `AI_API_KEY` | `sk-...` | your provider key (or `OPENAI_API_KEY`) |
+| `AI_PROVIDER` | `openai` / `anthropic` / `gemini` / `openrouter` / `groq` / `custom` | optional, default `openai` |
+| `AI_BASE_URL` | `https://api.openai.com/v1` | optional, must be OpenAI-compatible |
+| `AI_MODEL` | `gpt-4o-mini` | optional |
+
+A key saved in **Settings** wins over the environment variables.
+
+Check the live status at `/api/settings/ai` (example while unconfigured):
+`{"configured": false, "source": null, "provider": "openai", ...}`.
+
+> The AI chat lives **only in the hosted web app**. The offline APK is
+> deliberately network-free, so it cannot call an AI API without breaking its
+> airplane-mode guarantee.
+
 ## Getting started
 
 Requires Node.js and a PostgreSQL database.

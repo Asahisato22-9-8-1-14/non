@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const LINKS = [
@@ -10,6 +11,7 @@ const LINKS = [
   { href: "/maps", label: "Maps" },
   { href: "/notes", label: "Notes" },
   { href: "/decks", label: "Flashcards" },
+  { href: "/chat", label: "AI Chat" },
 ];
 
 export function SiteNav() {
@@ -47,6 +49,16 @@ export function SiteNav() {
             })}
           </nav>
           <span className="mx-1 h-4 w-px bg-line" />
+          <Link
+            href="/settings"
+            aria-label="Settings — AI & API"
+            title="Settings — AI & API"
+            className={`btn-icon h-8 w-8 border-transparent bg-transparent ${
+              pathname.startsWith("/settings") ? "text-ink" : ""
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+          </Link>
           <ThemeToggle />
         </div>
       </div>

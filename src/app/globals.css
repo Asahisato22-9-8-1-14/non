@@ -162,3 +162,23 @@ body {
   border: 1px solid var(--line);
   background: url('/study-x-icon.png') center / cover no-repeat;
 }
+
+/* ---------- chat markdown ---------- */
+.chat-md { line-height: 1.7; color: var(--ink); overflow-wrap: anywhere; }
+.chat-md > * + * { margin-top: 0.75em; }
+.chat-md h1, .chat-md h2, .chat-md h3, .chat-md h4 { font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; margin-top: 1.2em; }
+.chat-md h1 { font-size: 1.3em; } .chat-md h2 { font-size: 1.15em; } .chat-md h3 { font-size: 1.05em; }
+.chat-md ul { list-style: disc; padding-left: 1.4em; }
+.chat-md ol { list-style: decimal; padding-left: 1.4em; }
+.chat-md li + li { margin-top: 0.25em; }
+.chat-md li > ul, .chat-md li > ol { margin-top: 0.25em; }
+.chat-md a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.chat-md strong { font-weight: 600; }
+.chat-md blockquote { border-left: 3px solid var(--line); padding-left: 1em; color: var(--ink-2); }
+.chat-md code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.88em; background: var(--paper-2); border: 1px solid var(--line); border-radius: 5px; padding: 0.1em 0.35em; }
+.chat-md pre { background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px; padding: 0.9em 1em; overflow-x: auto; }
+.chat-md pre code { background: none; border: 0; padding: 0; font-size: 0.85em; }
+.chat-md table { width: 100%; border-collapse: collapse; font-size: 0.93em; display: block; overflow-x: auto; }
+.chat-md th, .chat-md td { border: 1px solid var(--line); padding: 0.45em 0.7em; text-align: left; }
+.chat-md th { background: var(--paper-2); font-weight: 600; }
+.chat-md hr { border: 0; border-top: 1px solid var(--line); }
