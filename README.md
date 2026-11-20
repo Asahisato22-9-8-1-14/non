@@ -302,3 +302,11 @@ git push origin v1.0.0
 
 The debug APK is for sideloading/testing; Play Store distribution needs a
 signed release build/AAB and a keystore secret.
+
+## Connecting an external tool (REA)
+
+`morluto/rea` is a local MCP server/CLI for reverse-engineering agents, not a
+web API — see [docs/REA-CONNECTION.md](docs/REA-CONNECTION.md) for the exact
+registration commands (`npx -y rea-agents@6.10.1 mcp`), the `rea setup` flags,
+`rea doctor` verification, and the Node.js requirement it currently fails on
+here. StudyX itself does not depend on REA.
