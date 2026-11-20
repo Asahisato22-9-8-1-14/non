@@ -4,11 +4,13 @@ android {
     namespace = "com.mindloom.studyapp"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.mindloom.studyapp"
+        // Capacitor writes the release flavour at build time; the default keeps
+        // the hosted WebView app id for a plain `assembleDebug`.
+        applicationId project.findProperty("studyAppId") ?: "com.mindloom.studyapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName project.findProperty("studyVersionName") ?: "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
