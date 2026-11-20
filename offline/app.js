@@ -217,11 +217,29 @@
     if (label) label.textContent = dark ? "Light" : "Dark";
     btn.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
   }
+  function clearStickyTabFocus() {
+    // Android WebViews keep :hover/:focus on the last tapped link. Blur it so
+    // the previous tab cannot look active after the hardware back button.
+    try {
+      var el = document.activeElement;
+      if (el && typeof el.matches === "function" && el.matches(".tabs a") &&
+          typeof el.blur === "function") el.blur();
+    } catch (e) { /* non-DOM preview */ }
+  }
+  function syncTabs(navName) {
+    Array.prototype.forEach.call(document.querySelectorAll(".tabs a"), function (a) {
+      var active = a.dataset.nav === navName;
+      a.classList.toggle("is-active", active);
+      if (active) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+  }
   function navBack() {
     if (nav.stack.length < 2) return false;
     nav.stack.pop();
     var target = nav.stack[nav.stack.length - 1];
     resetTransient();
+    clearStickyTabFocus();
     if (location.hash === target) { render(); return true; }
     // The stack is already popped, so the resulting hashchange sees its new
     // top as a duplicate and does not push it back on.
@@ -230,6 +248,7 @@
     return true;
   }
   function onHashChange() {
+    clearStickyTabFocus();
     var h = currentHash();
     var n = nav.stack.length;
     if (nav.stack[n - 1] === h) { render(); return; } // duplicate event
@@ -259,9 +278,7 @@
     }
     view.innerHTML = html;
     var navName = r.name === "decks" || r.name === "study" ? "decks" : r.name;
-    Array.prototype.forEach.call(document.querySelectorAll(".tabs a"), function (a) {
-      a.classList.toggle("is-active", a.dataset.nav === navName);
-    });
+    syncTabs(navName);
     if (ui.keepScroll) { window.scrollTo(0, y); ui.keepScroll = false; }
     else window.scrollTo(0, 0);
     afterRender(r);

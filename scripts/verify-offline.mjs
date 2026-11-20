@@ -40,6 +40,10 @@ assert.match(read("index.html"), /id="back-btn"/);
 assert.match(read("index.html"), /class="brand-name">StudyX</);
 assert.match(read("index.html"), /data-action="toggle-theme"/);
 assert.match(read("styles.css"), /safe-area-inset-top/);
+assert.match(read("styles.css"), /@media \(hover: hover\)/);
+assert.match(read("styles.css"), /\.tabs a\.is-active/);
+assert.match(read("app.js"), /aria-current/);
+assert.match(read("app.js"), /clearStickyTabFocus/);
 assert.match(read("app.js"), /StatusBar/);
 assert.match(read("app.js"), /backButton/);
 assert.match(read("app.js"), /nav-back/);
@@ -64,6 +68,8 @@ const workflow = readFileSync(join(root, ".github/workflows/build-offline-apk.ym
 assert.match(workflow, /set-offline-brand\.mjs/);
 assert.match(workflow, /StudyX\.apk/);
 assert.ok(existsSync(join(root, "StudyX/StudyX.apk")), "renamed APK mirror missing");
+assert.ok(existsSync(join(root, "StudyX/study-x-source.zip")), "attached source ZIP missing");
+assert.ok(existsSync(join(root, "StudyX/interface-reference.jpg")), "interface reference missing");
 assert.ok(!existsSync(join(root, "downloads/app-debug-offline.apk")), "old APK name still present");
 assert.match(read("logic.js"), /mindloom\.offline\.v1/, "storage key must stay stable across the rename");
 

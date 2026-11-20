@@ -78,6 +78,13 @@ secret updated to `https://non-ashen.vercel.app` for clarity.
 
 ## Offline APK — StudyX (no internet needed)
 
+The mislabelled `study x.json` attachment is a ZIP, saved as
+`StudyX/study-x-source.zip`; `StudyX/interface-reference.jpg` is the UI
+reference from the screenshot. That source snapshot is a Next.js app with
+AI/chat API routes and a database, so it is kept as reference material — the
+offline APK deliberately keeps the serverless StudyX interface shown in the
+screenshot.
+
 `.github/workflows/build-offline-apk.yml` builds a **second APK flavour** from
 `capacitor.offline.config.ts`. It has **no `server.url`**: Capacitor serves the
 files in `offline/` from inside the APK, so the app works in airplane mode. It is branded **StudyX**: the launcher name, in-app header, APK file
@@ -114,6 +121,10 @@ Mobile behaviour:
   (deck detail → deck list → guide) instead of closing the app. A visible `←`
   button appears whenever there is something to go back to; at the root,
   pressing back twice exits.
+- **Tab highlight:** the active tab always matches the visible screen. Hover
+  styling is limited to real mouse pointers (touch WebViews otherwise keep the
+  last tapped tab highlighted), the focused tab is blurred on navigation, and
+  the active pill uses an accent tint plus `aria-current="page"`.
 
 Build it locally with:
 

@@ -133,7 +133,9 @@ jobs:
             Install this build to use StudyX in airplane mode. All 49 study
             steps, the GRINDE/SIR widgets, mind maps, notes, flashcards and
             spaced-repetition progress are bundled in the APK and saved on the
-            device. It does **not** contact Vercel, Neon or any other server.
+            device. The active tab now follows the visible screen after Android
+            back (no sticky previous-tab highlight). It does **not** contact
+            Vercel, Neon or any other server.
 
             This is a debug APK for sideloading/testing. The separate `v1.0.x`
             releases are the online WebView build.
