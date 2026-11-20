@@ -388,7 +388,7 @@ export function ChatApp({
           className="flex items-center gap-2 border-t border-line px-4 py-3 text-xs text-ink-3 hover:text-ink"
         >
           <Settings className="h-3.5 w-3.5" />
-          {status.configured ? `${status.providerLabel} · ${status.model}` : "Connect an AI provider"}
+          {status.configured ? `${status.providerLabel} · ${status.model}` : "Connect 1–5 AI providers"}
         </Link>
       </aside>
 
@@ -468,8 +468,8 @@ export function ChatApp({
                 </span>
                 <h2 className="mt-4 text-xl font-semibold tracking-tight">Connect your AI</h2>
                 <p className="mt-2 text-sm text-ink-2">
-                  Add an API key from OpenAI, Claude, Gemini, OpenRouter, Groq or any
-                  OpenAI-compatible provider to start chatting.
+                  Connect 1 to {status.maxConnections} providers — OpenAI, Claude, Gemini,
+                  OpenRouter, Groq or any OpenAI-compatible endpoint — to start chatting.
                 </p>
                 <Link href="/settings" className="btn-primary mt-6">
                   <Settings className="h-4 w-4" />

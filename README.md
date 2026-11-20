@@ -48,8 +48,11 @@ or shipped safely in a public repo. Wire yours in ~60 seconds:
 3. Paste your own API key. The base URL and model are pre-filled per provider;
    for a proxy/self-hosted endpoint choose **Custom** and paste the full base
    URL, e.g. `https://my-proxy.example.com/v1`.
-4. Press **Save**, then **Test connection** — it sends one `OK` round-trip to
+4. Press **Connect**, then **Test connection** — it sends one `OK` round-trip to
    `/chat/completions` and reports the exact provider error if anything fails.
+   You can save **1 to 5** connections; the list shows which one is *in use*
+   and **Use** switches chat to another. Adding a sixth is blocked until you
+   remove one.
 5. Open **AI Chat** in the nav: streaming replies, Markdown, conversation list,
    attach a note or mind map as context, "Explain simply / Quiz me / Make
    flashcards / Build a study plan" shortcuts.

@@ -58,16 +58,42 @@ export const PROVIDERS: ProviderPreset[] = [
   },
 ];
 
+/** Connections are capped so the settings screen stays usable. */
+export const MAX_CONNECTIONS = 5;
+/** Chat needs at least this many working connections. */
+export const MIN_CONNECTIONS = 1;
+
 export function getPreset(id: string): ProviderPreset {
   return PROVIDERS.find((p) => p.id === id) ?? PROVIDERS[PROVIDERS.length - 1];
 }
 
+/** One saved API connection (key never leaves the server). */
+export type AiConnection = {
+  id: string;
+  provider: string;
+  label: string;
+  baseUrl: string;
+  model: string;
+  keyPreview: string;
+  isActive: boolean;
+};
+
+/**
+ * Safe status object sent to the browser: every connection is described, but
+ * only masked key previews are included.
+ */
 export type AiStatus = {
   configured: boolean;
   source: "database" | "env" | null;
+  /** The connection chat currently uses. */
+  activeId: string | null;
   provider: string;
   providerLabel: string;
   baseUrl: string;
   model: string;
   keyPreview: string | null;
+  /** 0–5 saved connections. */
+  connections: AiConnection[];
+  maxConnections: number;
+  minConnections: number;
 };

@@ -2,32 +2,39 @@ import { NextResponse } from "next/server";
 import {
   completionsUrl,
   getAiConfig,
+  getAiConfigById,
   readProviderError,
   requestInit,
   type AiConfig,
 } from "@/lib/ai";
 import { getPreset } from "@/lib/ai-providers";
 
-/** Test either the unsaved form values (merged with the saved key) or the saved config. */
+/**
+ * Test unsaved form values (merged with any stored key for that connection),
+ * one saved connection by id, or — with no id — the active connection.
+ */
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
-  const saved = await getAiConfig();
+  const savedById =
+    typeof body.id === "string" && body.id ? await getAiConfigById(body.id) : null;
+  const savedActive = savedById ? null : await getAiConfig();
+  const saved = savedById ?? savedActive?.config ?? null;
 
   const provider =
-    typeof body.provider === "string" ? body.provider : (saved?.config.provider ?? "openai");
+    typeof body.provider === "string" ? body.provider : (saved?.provider ?? "openai");
   const preset = getPreset(provider);
   const config: AiConfig = {
     provider,
     baseUrl:
       (typeof body.baseUrl === "string" && body.baseUrl.trim()) ||
-      saved?.config.baseUrl ||
+      saved?.baseUrl ||
       preset.baseUrl,
     model:
       (typeof body.model === "string" && body.model.trim()) ||
-      saved?.config.model ||
+      saved?.model ||
       preset.model,
     apiKey:
-      (typeof body.apiKey === "string" && body.apiKey.trim()) || saved?.config.apiKey || "",
+      (typeof body.apiKey === "string" && body.apiKey.trim()) || saved?.apiKey || "",
   };
 
   if (!config.apiKey) {
