@@ -13,19 +13,7 @@ screen. Everything runs inside the APK — no Wi-Fi, login, server or database.
 
 ## Repository description (GitHub About)
 
-StudyX 🪶 is a fully offline Android study app: the 49-step Justin Sung Study
-System (8 phases, GRINDE framework, SIR review model + timeline, flashcard demo,
-practice-error analyser and exam checklist), draggable mind maps, notes,
-flashcard decks with Leitner-box spaced repetition, a dashboard, progress ticks,
-dark/light parchment themes, a visible dark-mode switch, Instagram-style Android
-back navigation, correct active-tab highlighting, status-bar-safe header, and
-JSON backup/restore. All data is saved in the WebView's local storage; there is
-no sync with the hosted web app. The launcher icon and splash use the supplied
-oak/lantern/quill artwork. Install the sideload/debug APK from Releases
-(`StudyX.apk`); enable "Install unknown apps" and choose "Install anyway".
-Full source, the original ZIP snapshot, icon, artwork, QR and build workflow are
-in this repository. No internet, Vercel, Neon, CDN, web font or `fetch()` is
-used by the offline APK.
+StudyX 🪶 — study app with two builds: a fully offline Android APK (49-step Justin Sung system, GRINDE/SIR widgets, mind maps, notes, flashcards + Leitner SRS, parchment theme, oak/lantern/quill icon) and a hosted Next.js + Postgres web app with an AI study chat (OpenAI, Claude, Gemini, OpenRouter, Groq or any OpenAI-compatible API key you connect in Settings). Live: https://non-ashen.vercel.app — APK in Releases.
 
 > The GitHub integration token here can push code/releases but cannot edit
 > repository settings. `StudyX/GITHUB_DESCRIPTION.md` contains the exact text to
@@ -36,6 +24,7 @@ used by the offline APK.
 
 - `src/app/` — pages (dashboard, decks, maps, notes, study) and the JSON API routes
 - `src/components/` — editors, pickers, study session UI, and the study-system widgets
+- `src/app/api/chat/`, `src/app/api/ai/test/`, `src/app/api/settings/ai/` — AI assistant, provider test and key storage
 - `src/db/` — Drizzle ORM schema (`src/db/schema.ts`) and connection (`src/db/index.ts`)
 - `src/lib/` — queries, SRS logic, formatting, types, and theme helpers
 - `offline/` — fully self-contained offline app bundled inside the offline APK

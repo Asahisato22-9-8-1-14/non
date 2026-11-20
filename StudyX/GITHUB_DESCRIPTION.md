@@ -15,10 +15,12 @@ in `StudyX/README.md`, in the GitHub Release notes, and in this folder as
 ## Exact text for the About description
 
 ```
-StudyX 🪶 — fully offline Android study app: 49-step Justin Sung system, GRINDE/SIR widgets, mind maps, notes, flashcards + Leitner SRS, dark/light parchment theme, supplied oak/lantern/quill icon & splash, Android back stack, local JSON backups. No internet/server/database. Sideload StudyX.apk from Releases; icon + full info in README.
+StudyX 🪶 — study app with two builds: a fully offline Android APK (49-step Justin Sung system, GRINDE/SIR widgets, mind maps, notes, flashcards + Leitner SRS, parchment theme, oak/lantern/quill icon) and a hosted Next.js + Postgres web app with an AI study chat (OpenAI, Claude, Gemini, OpenRouter, Groq or any OpenAI-compatible API key you connect in Settings). Live: https://non-ashen.vercel.app — APK in Releases.
 ```
 
-Suggested **Homepage**: `https://github.com/Asahisato22-9-8-1-14/non/releases/latest`
+Suggested **Homepage**: `https://non-ashen.vercel.app`
+
+APK: `https://github.com/Asahisato22-9-8-1-14/non/releases/latest`
 
 Suggested **Topics**: `studyx`, `offline`, `android`, `capacitor`, `nextjs`,
 `postgres`, `flashcards`, `mind-map`, `spaced-repetition`, `justin-sung`.
