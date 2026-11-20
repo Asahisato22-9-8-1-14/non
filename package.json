@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "offline:data": "node scripts/build-offline-data.mjs",
-    "offline:verify": "node scripts/verify-offline.mjs"
+    "offline:verify": "node scripts/verify-offline.mjs",
+    "ai:bundle": "node scripts/build-ai-bundle.mjs",
+    "ai:verify": "node scripts/build-ai-bundle.mjs && node scripts/verify-ai-bundle.mjs"
   },
   "engines": {
     "node": ">=22"

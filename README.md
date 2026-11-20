@@ -35,6 +35,50 @@ StudyX 🪶 — study app with two builds: a fully offline Android APK (49-step 
 - `scripts/` — offline data generator, offline verification and DOM smoke test
 - `mind-mapping-flashcard-website.zip` — the original uploaded archive, kept for reference
 
+## Three builds — pick the one you want
+
+| Build | File | Needs internet? | What it is |
+| --- | --- | --- | --- |
+| **Offline APK** | `StudyX.apk` (`offline-v*`) | Never | Full app in airplane mode. No network code, no keys, no chat tab. |
+| **AI APK** | `StudyX-AI.apk` (`ai-v*`) | Only for chat | Same parchment app + **AI Chat** tab with **your own 1–5 API keys**. |
+| **Hosted web app** | `https://non-ashen.vercel.app` | Always | Next.js + Postgres version with chat history in the database. |
+
+Both APKs install side by side (different app ids: `…studyapp.offline` and
+`…studyapp.ai`) and both use the supplied oak / lantern / quill artwork.
+
+### StudyX AI — offline app + your own API key
+
+`StudyX-AI.apk` keeps everything the offline build has — 8 phases / 49 steps,
+GRINDE, SIR, error analyser, checklist, mind maps, notes, flashcards, Leitner
+review, dark/light parchment theme, back stack — and adds one tab:
+
+1. **AI Chat → Providers → Add provider.** Pick OpenAI, Anthropic Claude,
+   Google Gemini, OpenRouter, Groq or **Custom** (any OpenAI-compatible base
+   URL) and paste your key.
+2. Save **1 to 5** connections; the list shows which one is *in use* and
+   **Use for chat** switches provider. A sixth is refused until you remove one.
+3. Chat: suggestions, plain-text answers, transcript kept on the device.
+   **Test** sends a single `OK` round-trip and shows the provider's real error.
+
+Where the key goes: it is stored in the APK's local storage on **your phone**
+and sent **directly** to the provider you chose. There is no StudyX server in
+the middle. The Android build enables Capacitor's native HTTP stack, so provider
+CORS rules (OpenAI blocks browser calls) do not apply.
+
+**The offline part never needs a connection.** With no key, the Chat tab simply
+asks you to add one; maps, notes, decks and steps keep working in airplane mode.
+
+Build it locally:
+
+```bash
+npm run ai:verify                       # build offline-ai/ + assert only ai.js has network code
+cp capacitor.ai.config.ts capacitor.config.ts
+node scripts/set-offline-brand.mjs "StudyX AI"
+npx cap sync android && (cd android && ./gradlew assembleDebug)
+```
+
+or push an `ai-v*` tag and let `.github/workflows/build-ai-apk.yml` do it.
+
 ## AI chat + API connection (hosted app)
 
 The hosted app now ships the AI assistant from your source ZIP, but it does

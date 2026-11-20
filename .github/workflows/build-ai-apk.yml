@@ -1,0 +1,191 @@
+name: Build StudyX AI APK
+
+# Third flavour of StudyX: the offline app (same parchment interface, all 49
+# steps, maps, notes, flashcards working with no connection) plus an AI Chat tab
+# that calls a provider using the key the user saved on the device.
+#
+# The offline-only APK is still produced by build-offline-apk.yml and is
+# unchanged. This build has its own app id (`com.mindloom.studyapp.ai`),
+# launcher name (`StudyX AI`) and release asset (`StudyX-AI.apk`), so it can be
+# installed next to the offline APK and the hosted WebView APK.
+on:
+  push:
+    tags:
+      - "ai-v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Set up Java 17 (temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # Capacitor 8 requires JDK 21 for Gradle even though the runner starts on 17.
+      - name: Activate JDK 21 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      # The offline bundle must still be network-free, and the AI bundle adds
+      # exactly one network-aware file (ai.js).
+      - name: Verify offline bundle is untouched
+        run: node scripts/verify-offline.mjs
+
+      - name: Build and verify AI bundle
+        run: npm run ai:verify
+
+      - name: Use AI Capacitor config
+        run: cp capacitor.ai.config.ts capacitor.config.ts
+
+      - name: Set StudyX AI launcher name
+        run: node scripts/set-offline-brand.mjs "StudyX AI"
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
+      - name: Verify bundled AI assets
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const cfg = JSON.parse(fs.readFileSync("android/app/src/main/assets/capacitor.config.json", "utf8"));
+          if (cfg.appId !== "com.mindloom.studyapp.ai") throw new Error("wrong appId: " + cfg.appId);
+          if (cfg.appName !== "StudyX AI") throw new Error("wrong appName: " + cfg.appName);
+          if (cfg.server && cfg.server.url) throw new Error("AI build must bundle its UI, not load a URL");
+          if (!cfg.plugins || !cfg.plugins.CapacitorHttp || !cfg.plugins.CapacitorHttp.enabled) {
+            throw new Error("CapacitorHttp must be enabled for provider calls");
+          }
+          const dir = "android/app/src/main/assets/public";
+          for (const f of ["index.html", "app.js", "ai.js", "data.js", "logic.js", "styles.css", "manifest.json", "studyx-art.jpg", "studyx-icon.png"]) {
+            if (!fs.existsSync(dir + "/" + f)) throw new Error("missing bundled asset " + f);
+          }
+          const html = fs.readFileSync(dir + "/index.html", "utf8");
+          if (!/script src="ai\.js"/.test(html)) throw new Error("ai.js is not wired into index.html");
+          if (/ai-slot:/.test(html)) throw new Error("placeholder text shipped in the AI build");
+          // Study content must not need the network: only ai.js may hold a URL.
+          for (const f of fs.readdirSync(dir)) {
+            if (!/\.(js|html|css|json)$/.test(f) || f === "ai.js") continue;
+            const text = fs.readFileSync(dir + "/" + f, "utf8");
+            if (/https?:\/\/(?!www\.w3\.org\/2000\/svg)/i.test(text)) throw new Error(f + " contains a remote URL");
+          }
+          console.log("::notice::OK: StudyX AI bundles " + fs.readdirSync(dir).length + " local assets + ai.js; only ai.js uses the network");
+          NODE
+
+      - name: Point Gradle at the Android SDK
+        run: |
+          SDK_DIR="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "SDK_DIR=$SDK_DIR"
+          java -version
+          if [ -n "$SDK_DIR" ]; then
+            echo "sdk.dir=$SDK_DIR" > android/local.properties
+            ls "$SDK_DIR/platforms" || true
+          fi
+          chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee "$RUNNER_TEMP/gradle-build.log"
+
+      - name: Keep a copy of the APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/StudyX-AI.apk"
+
+      - name: Upload Gradle log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-gradle-build-log
+          path: ${{ runner.temp }}/gradle-build.log
+          if-no-files-found: ignore
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyX-AI-apk
+          path: ${{ runner.temp }}/StudyX-AI.apk
+          if-no-files-found: error
+
+      # Mirror into the branch as well: some mobile networks stall on GitHub's
+      # release-asset CDN but fetch github.com raw files fine.
+      - name: Mirror AI APK into branch for direct download
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git checkout -- capacitor.config.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --depth=1 origin arena/032b4ea2-non
+          git checkout --detach FETCH_HEAD
+          mkdir -p StudyX
+          cp "$RUNNER_TEMP/StudyX-AI.apk" StudyX/StudyX-AI.apk
+          git add -f StudyX/StudyX-AI.apk
+          git commit -m "Mirror StudyX AI APK into branch for direct download"
+          git push origin HEAD:arena/032b4ea2-non
+
+      - name: Publish GitHub Release with AI APK
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ runner.temp }}/StudyX-AI.apk
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          body: |
+            ![StudyX icon](${{ github.server_url }}/${{ github.repository }}/raw/refs/heads/arena/032b4ea2-non/StudyX/study-x-icon.png)
+
+            ## StudyX AI — offline study app **with** an optional AI chat
+
+            This is the **second, separate APK**. The offline-only build
+            (`offline-v*` releases, `StudyX.apk`) is unchanged and still never
+            touches the network. This build has the same parchment / oak /
+            lantern / quill interface, the same icon and splash, and all the
+            same content — plus an **AI Chat** tab.
+
+            ### What you get
+
+            1. **Your own API key.** Settings → AI Chat → Providers → Add
+               provider. Choose OpenAI, Anthropic Claude, Google Gemini,
+               OpenRouter, Groq or any OpenAI-compatible base URL. You can save
+               **1 to 5** connections and switch which one chat uses. Keys are
+               stored only on this device and sent directly to that provider —
+               no StudyX server is involved.
+            2. **The interface you supplied.** Identical light/dark parchment
+               theme, oak/lantern/quill icon, splash screen, status-bar-safe
+               header, Instagram-style back stack and single active tab.
+            3. **Offline first.** All 8 phases / 49 steps, GRINDE, SIR, the
+               practice-error analyser, exam checklist, mind maps, notes,
+               flashcards and Leitner review work with no connection. Only the
+               AI Chat tab needs internet, and the app says so on its badge.
+
+            ### Install
+
+            Enable "Install unknown apps" and tap **Install anyway** for the
+            debug signature. The app id is `com.mindloom.studyapp.ai`, so it
+            installs **next to** the offline APK (`…studyapp.offline`) and the
+            hosted WebView build (`…studyapp`) without replacing either.
+
+            ### Notes
+
+            - Direct browser calls to OpenAI/Anthropic are blocked by CORS; this
+              APK uses Android's native HTTP stack, so provider CORS rules do
+              not apply.
+            - Chat history and keys live in the WebView's local storage. Use
+              Settings & backup in the offline APK (or More tab) for progress
+              backups.
+            - A debug APK is for sideloading/testing, not a Play Store upload.

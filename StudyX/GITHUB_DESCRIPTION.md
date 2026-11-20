@@ -15,7 +15,7 @@ in `StudyX/README.md`, in the GitHub Release notes, and in this folder as
 ## Exact text for the About description
 
 ```
-StudyX 🪶 — study app with two builds: a fully offline Android APK (49-step Justin Sung system, GRINDE/SIR widgets, mind maps, notes, flashcards + Leitner SRS, parchment theme, oak/lantern/quill icon) and a hosted Next.js + Postgres web app with an AI study chat (OpenAI, Claude, Gemini, OpenRouter, Groq or any OpenAI-compatible API key you connect in Settings). Live: https://non-ashen.vercel.app — APK in Releases.
+StudyX 🪶 — study app with two builds: a fully offline Android APK (49-step Justin Sung system, GRINDE/SIR widgets, mind maps, notes, flashcards + Leitner SRS, parchment theme, oak/lantern/quill icon) and a hosted Next.js + Postgres web app with an AI study chat (OpenAI, Claude, Gemini, OpenRouter, Groq or any OpenAI-compatible API key you connect in Settings). Two APKs in Releases: StudyX.apk (fully offline) and StudyX-AI.apk (offline app + AI chat with your own 1–5 API keys). Live web app: https://non-ashen.vercel.app
 ```
 
 Suggested **Homepage**: `https://non-ashen.vercel.app`

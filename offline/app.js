@@ -11,6 +11,26 @@
     return;
   }
 
+  /* The AI build's ai.js renders its own screens but reuses this shell's
+   * render/scroll/toast helpers, so the interface stays identical. */
+  // ai.js loads after this file (AI build only) and fires this when its panel
+  // is ready, so the AI tab appears and the current screen can use it.
+  window.addEventListener("studyx:ai-ready", function () { render(); });
+
+  window.StudyXChat = {
+    renderKeep: function () { ui.keepScroll = true; render(); },
+    render: function () { render(); },
+    toast: function (m) { toast(m); },
+    scrollBottom: function () {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  };
+  function chatPanel() { return window.StudyXChatPanel || null; }
+  function aiEnabled() {
+    var p = chatPanel();
+    return !!(p && p.enabled && p.enabled());
+  }
+
   var storage = window.localStorage;
   var state = L.loadState(storage, Date.now());
   var ui = {
@@ -226,6 +246,11 @@
           typeof el.blur === "function") el.blur();
     } catch (e) { /* non-DOM preview */ }
   }
+  function syncChatTab() {
+    var tab = document.querySelector('.tabs a[data-nav="chat"]');
+    if (!tab) return;
+    tab.hidden = !aiEnabled();
+  }
   function syncTabs(navName) {
     Array.prototype.forEach.call(document.querySelectorAll(".tabs a"), function (a) {
       var active = a.dataset.nav === navName;
@@ -274,10 +299,14 @@
       case "maps": html = r.parts[1] ? renderMap(r) : renderMaps(); break;
       case "notes": html = renderNotes(); break;
       case "settings": html = renderSettings(); break;
+      case "chat":
+        html = aiEnabled() ? chatPanel().render() : renderGuide(r);
+        break;
       default: html = renderGuide(r);
     }
     view.innerHTML = html;
     var navName = r.name === "decks" || r.name === "study" ? "decks" : r.name;
+    syncChatTab();
     syncTabs(navName);
     if (ui.keepScroll) { window.scrollTo(0, y); ui.keepScroll = false; }
     else window.scrollTo(0, 0);
@@ -286,6 +315,7 @@
 
   function afterRender(r) {
     updateThemeButton();
+    syncChatTab();
     updateBackButton();
     if (r.name === "maps" && r.parts[1]) drawLines();
     if (r.name === "guide" && r.params.get("step")) {
@@ -762,14 +792,20 @@
     var json = L.exportJSON(state);
     return [
       '<div class="page-head"><p class="eyebrow">More</p><h1 class="h1">Settings &amp; backup</h1>',
-      '<p class="lede">This app is fully offline. Nothing is uploaded anywhere.</p></div>',
+      '<p class="lede">' + (aiEnabled()
+        ? "Study content works offline. Only the AI Chat tab uses the internet."
+        : "This app is fully offline. Nothing is uploaded anywhere.") + '</p></div>',
       '<div class="card card-pad">',
-      '<h3>Works without internet</h3>',
+      '<h3>' + (aiEnabled() ? "Works offline — AI is optional" : "Works without internet") + '</h3>',
       '<ul style="margin-top:10px" class="small muted">',
       '<li>• All 49 study steps, GRINDE, SIR and exam checklist are bundled in the APK.</li>',
       '<li>• Mind maps, notes, flashcards and review history are saved on this device.</li>',
-      '<li>• No account, no database, no fonts or scripts loaded from the network.</li>',
-      '<li>• A separate online APK connects to the hosted web app — that one needs data or Wi-Fi.</li>',
+      (aiEnabled()
+        ? '<li>• AI Chat sends messages with your own key to the provider you chose — nothing goes through a StudyX server.</li>'
+        : '<li>• No account, no database, no fonts or scripts loaded from the network.</li>'),
+      (aiEnabled()
+        ? '<li>• The separate offline-only APK has no Chat tab and never touches the network.</li>'
+        : '<li>• A separate AI APK adds a Chat tab; the online APK connects to the hosted web app.</li>'),
       '</ul>',
       '<div class="flex" style="margin-top:14px"><button class="btn" data-action="toggle-theme">Switch to ' + (state.progress.theme === "dark" ? "light" : "dark") + ' theme</button></div>',
       '</div>',
@@ -914,6 +950,15 @@
           toast("Backup file requested");
         } catch (err) { toast("Use Copy backup instead"); }
         break;
+      case "ai-add": if (chatPanel()) chatPanel().startAdd(); break;
+      case "ai-edit": if (chatPanel()) chatPanel().startEdit(el.dataset.id); break;
+      case "ai-remove": if (chatPanel()) chatPanel().removeConnection(el.dataset.id); break;
+      case "ai-use": if (chatPanel()) chatPanel().useConnection(el.dataset.id); break;
+      case "ai-test-saved": if (chatPanel()) chatPanel().testSaved(el.dataset.id); break;
+      case "ai-tab": if (chatPanel()) { chatPanel().setTab(el.dataset.tab); chatPanel().resetView(); renderKeep(); } break;
+      case "ai-cancel-edit": if (chatPanel()) { chatPanel().resetView && chatPanel().resetView(); renderKeep(); } break;
+      case "ai-clear-chat": if (chatPanel()) chatPanel().clearChat(); break;
+      case "ai-suggest": if (chatPanel()) chatPanel().feedSuggestion(Number(el.dataset.i)); break;
       case "reset-data":
         armOrRun("reset-data", function () {
           state = L.createInitialState(now());
@@ -934,10 +979,19 @@
     var el = e.target.closest("[data-action]");
     if (!el) return;
     switch (el.dataset.action) {
+      case "ai-switch":
+        if (chatPanel()) chatPanel().useConnection(el.value);
+        break;
       case "toggle-step":
         L.toggleStep(state, el.dataset.id); save(); renderKeep(); break;
       case "toggle-check":
         L.toggleChecklist(state, Number(el.dataset.index)); save(); renderKeep(); break;
+    }
+  });
+
+  document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "ai-provider" && chatPanel()) {
+      chatPanel().chooseProvider(e.target.value);
     }
   });
 
@@ -983,6 +1037,12 @@
           pinned: !!form.querySelector('[name="pinned"]').checked,
         }, now());
         save(); toast("Note saved"); renderKeep();
+        break;
+      case "ai-save":
+        if (chatPanel()) chatPanel().saveConnection(d);
+        break;
+      case "ai-send":
+        if (chatPanel()) chatPanel().send(d.message);
         break;
       case "import-backup":
         // No re-render on the first tap: it would wipe the pasted JSON.

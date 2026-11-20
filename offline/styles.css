@@ -363,3 +363,22 @@ input[type="checkbox"] { width: auto; accent-color: var(--accent); }
   .rating-row { grid-template-columns: repeat(2, 1fr); }
   .card-pad { padding: 15px; }
 }
+
+/* ---------------------------- AI chat (AI build) ----------------------------
+   Shared by both builds so the AI APK looks identical to the offline one. The
+   offline APK never renders these because it ships no ai.js. */
+.chat-row { display: flex; margin: 12px 0; }
+.chat-row.is-mine { justify-content: flex-end; }
+.chat-bubble {
+  max-width: 88%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+.chat-bubble.is-mine { background: var(--accent-soft); border-color: var(--accent); }
+.chat-bubble .small { white-space: pre-wrap; overflow-wrap: anywhere; }
+.chat-error { margin: 12px 0; border-color: var(--rose); }
+.chat-error strong { color: var(--rose); }
+.chat-form { margin-top: 14px; }

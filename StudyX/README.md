@@ -59,3 +59,16 @@ Play Protect warns about the debug signature.
 
 Push an `offline-v*` tag to rebuild; the `v*` workflow still builds the online
 WebView APK.
+
+## Two APKs in this folder
+
+| File | Release | Internet | Notes |
+| --- | --- | --- | --- |
+| `StudyX.apk` | `offline-v*` | never | fully offline build |
+| `StudyX-AI.apk` | `ai-v*` | chat only, with your own key | same app + AI Chat tab |
+
+`StudyX-AI.apk` adds **AI Chat**: save 1–5 provider keys (OpenAI, Claude,
+Gemini, OpenRouter, Groq or any OpenAI-compatible URL) on the device, switch the
+active provider at any time, and chat while the rest of StudyX stays usable
+offline. Keys never touch a StudyX server — they go straight from your phone to
+the provider. Install both side by side; they have different app ids.
