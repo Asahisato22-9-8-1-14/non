@@ -36,6 +36,9 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
   const [model, setModel] = useState(getPreset("openai").model);
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
+  /* Model + base URL are preset-derived, so they stay hidden unless the user
+   * opens "Change" (proxy, self-hosted API or a different model). */
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [busy, setBusy] = useState<Busy>(null);
   const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
 
@@ -55,6 +58,7 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
     setModel(getPreset("openai").model);
     setApiKey("");
     setShowKey(false);
+    setShowAdvanced(false);
     setResult(null);
   }
 
@@ -72,6 +76,7 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
     setModel(c.model);
     setApiKey("");
     setShowKey(false);
+    setShowAdvanced(false);
     setResult(null);
   }
 
@@ -83,6 +88,7 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
       setModel(p.model);
       if (!label.trim()) setLabel(p.label);
     }
+    setShowAdvanced(false);
     setResult(null);
   }
 
@@ -245,8 +251,8 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
 
         {connections.length === 0 ? (
           <p className="mt-4 rounded-lg border border-dashed border-line px-4 py-6 text-center text-sm text-ink-3">
-            No connections yet. Add OpenAI, Claude, Gemini, OpenRouter, Groq or any
-            OpenAI-compatible endpoint below.
+            No connections yet. Add OpenAI, Claude, Gemini, OpenRouter, Groq, Perplexity
+            or any OpenAI-compatible endpoint below.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-line overflow-hidden rounded-lg border border-line">
@@ -402,46 +408,62 @@ export function AiSettingsForm({ initialStatus }: { initialStatus: AiStatus }) {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <label htmlFor="ai-label" className="mb-1.5 block text-xs font-medium text-ink-2">
-                  Name (optional)
-                </label>
-                <input
-                  id="ai-label"
-                  value={label}
-                  onChange={(e) => setLabel(e.target.value)}
-                  placeholder={preset.label}
-                  className="field"
-                />
-              </div>
-              <div>
-                <label htmlFor="ai-model" className="mb-1.5 block text-xs font-medium text-ink-2">
-                  Model
-                </label>
-                <input
-                  id="ai-model"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder="e.g. gpt-4o-mini"
-                  spellCheck={false}
-                  className="field font-mono"
-                />
-              </div>
-              <div>
-                <label htmlFor="ai-url" className="mb-1.5 block text-xs font-medium text-ink-2">
-                  Base URL
-                </label>
-                <input
-                  id="ai-url"
-                  value={baseUrl}
-                  onChange={(e) => setBaseUrl(e.target.value)}
-                  placeholder="https://api.example.com/v1"
-                  spellCheck={false}
-                  className="field font-mono"
-                />
-              </div>
+            <div>
+              <label htmlFor="ai-label" className="mb-1.5 block text-xs font-medium text-ink-2">
+                Name <span className="font-normal text-ink-3">(optional)</span>
+              </label>
+              <input
+                id="ai-label"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder={preset.label}
+                maxLength={40}
+                className="field"
+              />
             </div>
+
+            <p className="text-xs text-ink-3">
+              Model <code className="rounded bg-paper-2 px-1">{preset.model || "—"}</code> ·
+              URL <code className="rounded bg-paper-2 px-1">{preset.baseUrl || "—"}</code>{" "}
+              <button
+                type="button"
+                onClick={() => setShowAdvanced((v) => !v)}
+                className="cursor-pointer text-accent underline underline-offset-2"
+              >
+                {showAdvanced ? "Hide advanced" : "Change"}
+              </button>
+            </p>
+
+            {showAdvanced && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="ai-model" className="mb-1.5 block text-xs font-medium text-ink-2">
+                    Model
+                  </label>
+                  <input
+                    id="ai-model"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder="e.g. gpt-4o-mini"
+                    spellCheck={false}
+                    className="field font-mono"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="ai-url" className="mb-1.5 block text-xs font-medium text-ink-2">
+                    Base URL <span className="font-normal text-ink-3">(proxy / self-hosted)</span>
+                  </label>
+                  <input
+                    id="ai-url"
+                    value={baseUrl}
+                    onChange={(e) => setBaseUrl(e.target.value)}
+                    placeholder="https://api.example.com/v1"
+                    spellCheck={false}
+                    className="field font-mono"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {result && (

@@ -55,12 +55,17 @@ assert.match(ai, /var MAX = 5;/);
 assert.match(ai, /var MIN = 1;/);
 assert.match(ai, /ml\.ai\.v1/);
 assert.match(ai, /StudyXChatPanel/);
-["openai", "anthropic", "gemini", "openrouter", "groq", "custom"].forEach((p) =>
+["openai", "anthropic", "gemini", "openrouter", "groq", "perplexity", "custom"].forEach((p) =>
   assert.match(ai, new RegExp(`id: "${p}"`), `provider ${p} missing`),
 );
 assert.match(ai, /chat\/completions/);
 assert.match(ai, /Authorization: "Bearer "/);
 assert.match(ai, /at most " \+ MAX \+ " providers/);
+/* The simple form asks for a key only; model/URL stay behind "Advanced". */
+assert.match(ai, /Name <span class="small muted">\(optional\)<\/span>/);
+assert.match(ai, /ui\.advanced \? values\.baseUrl : ""/);
+assert.match(ai, /sonar/, "Perplexity preset must default to the sonar model");
+assert.match(ai, /https:\/\/api\.perplexity\.ai/);
 /* It must not silently fall back to any built-in key or StudyX server. */
 assert.doesNotMatch(ai, /AI_API_KEY/, "the AI APK must use only the user's own key");
 assert.doesNotMatch(ai, /vercel\.app/, "the AI chat never goes through the hosted app");
@@ -84,7 +89,7 @@ assert.ok(manifest.icons.some((i) => i.src === "studyx-icon.png"));
 
 console.log("AI bundle verification passed:", {
   files: files.length,
-  providers: 6,
+  providers: 7,
   maxConnections: 5,
   minConnections: 1,
   offlineDirUntouched: true,

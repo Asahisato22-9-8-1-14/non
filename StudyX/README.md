@@ -68,7 +68,7 @@ WebView APK.
 | `StudyX-AI.apk` | `ai-v*` | chat only, with your own key | same app + AI Chat tab |
 
 `StudyX-AI.apk` adds **AI Chat**: save 1–5 provider keys (OpenAI, Claude,
-Gemini, OpenRouter, Groq or any OpenAI-compatible URL) on the device, switch the
+Gemini, OpenRouter, Groq, Perplexity or any OpenAI-compatible URL) on the device, switch the
 active provider at any time, and chat while the rest of StudyX stays usable
 offline. Keys never touch a StudyX server — they go straight from your phone to
 the provider. Install both side by side; they have different app ids.

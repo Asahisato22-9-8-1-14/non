@@ -53,8 +53,10 @@ GRINDE, SIR, error analyser, checklist, mind maps, notes, flashcards, Leitner
 review, dark/light parchment theme, back stack — and adds one tab:
 
 1. **AI Chat → Providers → Add provider.** Pick OpenAI, Anthropic Claude,
-   Google Gemini, OpenRouter, Groq or **Custom** (any OpenAI-compatible base
-   URL) and paste your key.
+   Google Gemini, OpenRouter, Groq, **Perplexity** or **Custom** (any
+   OpenAI-compatible base URL). The form asks for just an **optional name** and
+   **your API key** — the model and URL come from the preset. Tap **Change**
+   only if you use a proxy, a self-hosted endpoint or a different model.
 2. Save **1 to 5** connections; the list shows which one is *in use* and
    **Use for chat** switches provider. A sixth is refused until you remove one.
 3. Chat: suggestions, plain-text answers, transcript kept on the device.
@@ -88,10 +90,11 @@ or shipped safely in a public repo. Wire yours in ~60 seconds:
 1. Open `https://non-ashen.vercel.app/settings` (or **Settings** icon in the
    hosted app header).
 2. Pick a provider preset — **OpenAI**, **Anthropic Claude**, **Google Gemini**,
-   **OpenRouter**, **Groq** or **Custom (any OpenAI-compatible URL)**.
-3. Paste your own API key. The base URL and model are pre-filled per provider;
-   for a proxy/self-hosted endpoint choose **Custom** and paste the full base
-   URL, e.g. `https://my-proxy.example.com/v1`.
+   **OpenRouter**, **Groq**, **Perplexity** or **Custom (any OpenAI-compatible
+   URL)**.
+3. Paste your own API key. Only the name (optional) and key are shown; the model
+   and base URL are preset. **Change** reveals them for a proxy, a self-hosted
+   endpoint (`https://my-proxy.example.com/v1`) or another model.
 4. Press **Connect**, then **Test connection** — it sends one `OK` round-trip to
    `/chat/completions` and reports the exact provider error if anything fails.
    You can save **1 to 5** connections; the list shows which one is *in use*

@@ -29,6 +29,7 @@
     { id: "gemini", label: "Google Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-2.5-flash", hint: "AIza...", url: "https://aistudio.google.com/app/apikey" },
     { id: "openrouter", label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1", model: "openai/gpt-4o-mini", hint: "sk-or-...", url: "https://openrouter.ai/keys" },
     { id: "groq", label: "Groq", baseUrl: "https://api.groq.com/openai/v1", model: "llama-3.3-70b-versatile", hint: "gsk_...", url: "https://console.groq.com/keys" },
+    { id: "perplexity", label: "Perplexity", baseUrl: "https://api.perplexity.ai", model: "sonar", hint: "pplx-...", url: "https://www.perplexity.ai/settings/api" },
     { id: "custom", label: "Custom (OpenAI-compatible)", baseUrl: "", model: "", hint: "Your API key" }
   ];
 
@@ -182,6 +183,7 @@
     baseUrl: preset("openai").baseUrl,
     model: preset("openai").model,
     apiKey: "",
+    advanced: false,       // preset model/base URL overrides, hidden by default
     test: null,
     pending: null
   };
@@ -219,7 +221,7 @@
       out.push('</div>');
     } else {
       out.push('<div class="card card-pad" style="margin-top:10px"><p class="small muted" style="margin:0">' +
-        'No key yet. Add OpenAI, Claude, Gemini, OpenRouter, Groq or any OpenAI-compatible endpoint below. ' +
+        'No key yet. Add OpenAI, Claude, Gemini, OpenRouter, Groq, Perplexity or any OpenAI-compatible endpoint below. ' +
         'Until one is added the rest of StudyX still works completely offline.</p></div>');
     }
 
@@ -233,16 +235,27 @@
         out.push('<option value="' + x.id + '"' + (ui.provider === x.id ? " selected" : "") + '>' + escChat(x.label) + '</option>');
       });
       out.push('</select></div>');
-      out.push('<div class="field"><label for="ai-label">Name (optional)</label>' +
-        '<input id="ai-label" name="label" value="' + escChat(ui.label) + '" placeholder="' + escChat(p.label) + '" autocapitalize="words"></div>');
+      // Only two things are required: a name is optional, the API key is not.
+      // The preset already knows the model and every base URL, so those live
+      // behind "Advanced" for people using a proxy or a different model.
+      out.push('<div class="field"><label for="ai-label">Name <span class="small muted">(optional)</span></label>' +
+        '<input id="ai-label" name="label" value="' + escChat(ui.label) + '" placeholder="' +
+        escChat(p.label) + '" autocapitalize="words" maxlength="40"></div>');
       out.push('<div class="field"><label for="ai-key">API key</label>' +
         '<input id="ai-key" name="apiKey" type="password" value="' + escChat(ui.apiKey) + '" placeholder="' +
-        escChat(ui.editing ? "Saved key kept if left blank" : p.hint) + '" autocomplete="off" spellcheck="false"></div>');
-      if (p.url) out.push('<p class="small muted" style="margin:-6px 0 10px">Get a key: <a href="' + p.url + '" target="_blank" rel="noopener">' + p.url.replace(/^https:\/\//, "") + '</a></p>');
-      out.push('<div class="field"><label for="ai-model">Model</label>' +
-        '<input id="ai-model" name="model" value="' + escChat(ui.model) + '" placeholder="' + escChat(p.model) + '" spellcheck="false"></div>');
-      out.push('<div class="field"><label for="ai-url">Base URL</label>' +
-        '<input id="ai-url" name="baseUrl" value="' + escChat(ui.baseUrl) + '" placeholder="' + escChat(p.baseUrl) + '" spellcheck="false" inputmode="url"></div>');
+        escChat(ui.editing ? "Saved key kept if left blank" : p.hint) + '" autocomplete="off" spellcheck="false" required></div>');
+      if (p.url) out.push('<p class="small muted" style="margin:-6px 0 12px">Get a key: <a href="' + p.url + '" target="_blank" rel="noopener">' + p.url.replace(/^https:\/\//, "") + '</a></p>');
+
+      out.push('<p class="small" style="margin:0 0 10px">Model <code>' + escChat(p.model || "set below") +
+        '</code> · URL <code>' + escChat(p.baseUrl || "set below") + '</code> ' +
+        '<button class="link-btn" type="button" data-action="ai-advanced">' +
+        (ui.advanced ? "Hide advanced" : "Change") + '</button></p>');
+      if (ui.advanced) {
+        out.push('<div class="field"><label for="ai-model">Model</label>' +
+          '<input id="ai-model" name="model" value="' + escChat(ui.model) + '" placeholder="' + escChat(p.model) + '" spellcheck="false"></div>');
+        out.push('<div class="field"><label for="ai-url">Base URL <span class="small muted">(only for a proxy or self-hosted API)</span></label>' +
+          '<input id="ai-url" name="baseUrl" value="' + escChat(ui.baseUrl) + '" placeholder="' + escChat(p.baseUrl) + '" spellcheck="false" inputmode="url"></div>');
+      }
       out.push('<p class="small muted" style="margin-top:2px">The key is saved only on this device. It is sent straight to this provider — no StudyX server sees it.</p>');
       out.push('<div class="form-actions">');
       out.push('<button class="btn btn-primary" type="submit">' + (ui.editing ? "Save changes" : "Connect") + '</button>');
@@ -359,7 +372,7 @@
   function startAdd() {
     ui.tab = "keys";               // the form lives on the Providers tab
     ui.adding = true; ui.editing = null; ui.test = null;
-    ui.provider = "openai"; ui.label = ""; ui.apiKey = "";
+    ui.provider = "openai"; ui.label = ""; ui.apiKey = ""; ui.advanced = false;
     ui.baseUrl = preset("openai").baseUrl; ui.model = preset("openai").model;
     HOST.renderKeep();
   }
@@ -370,6 +383,8 @@
     ui.tab = "keys";
     ui.adding = false; ui.editing = id; ui.test = null; ui.apiKey = "";
     ui.provider = c.provider; ui.label = c.label; ui.baseUrl = c.baseUrl; ui.model = c.model;
+    var presetModel = preset(c.provider).model;
+    ui.advanced = c.baseUrl !== preset(c.provider).baseUrl || c.model !== presetModel;
     HOST.renderKeep();
   }
   function saveConnection(values) {
@@ -383,8 +398,10 @@
     }
     var key = String(values.apiKey || ui.apiKey || "").trim() || (existing && existing.apiKey) || "";
     if (!key) { HOST.toast("Enter an API key first"); return; }
-    var baseUrl = String(values.baseUrl || ui.baseUrl || p.baseUrl).trim() || p.baseUrl;
-    var model = String(values.model || ui.model || p.model).trim() || p.model;
+    // Hidden fields are not submitted, so fall back to the preset the user
+    // picked. Advanced mode keeps whatever they typed.
+    var baseUrl = String((ui.advanced ? values.baseUrl : "") || p.baseUrl || ui.baseUrl).trim() || p.baseUrl;
+    var model = String((ui.advanced ? values.model : "") || p.model || ui.model).trim() || p.model;
     if (!/^https?:\/\//i.test(baseUrl)) { HOST.toast("Base URL must start with https://"); return; }
     if (!model) { HOST.toast("Model name is required"); return; }
 
@@ -405,6 +422,7 @@
     if (!ai.activeId) ai.activeId = ai.connections[0].id;
     persist();
     ui.adding = false; ui.editing = null; ui.apiKey = ""; ui.test = null; ui.error = null;
+    ui.advanced = false;
     ui.tab = "chat";              // first key connected: go straight to chatting
     HOST.renderKeep();
   }
@@ -493,6 +511,7 @@
     resetView: function () { ui.error = null; ui.test = null; },
     configured: isConfigured,
     startAdd: startAdd,
+    toggleAdvanced: function () { ui.advanced = !ui.advanced; HOST.renderKeep(); },
     startEdit: startEdit,
     saveConnection: saveConnection,
     removeConnection: removeConnection,
@@ -509,6 +528,7 @@
       ui.provider = id;
       var p = preset(id);
       if (id !== "custom") { ui.baseUrl = p.baseUrl; ui.model = p.model; if (!ui.label) ui.label = p.label; }
+      ui.advanced = false;
       HOST.renderKeep();
     },
     clearChat: function () {

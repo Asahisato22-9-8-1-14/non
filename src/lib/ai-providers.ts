@@ -50,6 +50,14 @@ export const PROVIDERS: ProviderPreset[] = [
     keyUrl: "https://console.groq.com/keys",
   },
   {
+    id: "perplexity",
+    label: "Perplexity",
+    baseUrl: "https://api.perplexity.ai",
+    model: "sonar",
+    keyPlaceholder: "pplx-...",
+    keyUrl: "https://www.perplexity.ai/settings/api",
+  },
+  {
     id: "custom",
     label: "Custom (OpenAI-compatible)",
     baseUrl: "",

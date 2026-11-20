@@ -959,6 +959,7 @@
       case "ai-cancel-edit": if (chatPanel()) { chatPanel().resetView && chatPanel().resetView(); renderKeep(); } break;
       case "ai-clear-chat": if (chatPanel()) chatPanel().clearChat(); break;
       case "ai-suggest": if (chatPanel()) chatPanel().feedSuggestion(Number(el.dataset.i)); break;
+      case "ai-advanced": if (chatPanel()) chatPanel().toggleAdvanced(); break;
       case "reset-data":
         armOrRun("reset-data", function () {
           state = L.createInitialState(now());

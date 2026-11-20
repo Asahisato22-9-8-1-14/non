@@ -91,13 +91,14 @@ assert.match(text(), /Everything else in StudyX keeps working offline/);
 
 /* --------------------------- add a first provider ------------------------ */
 click('[data-action="ai-add"]');
-submit('form[data-form="ai-save"]', {
-  provider: "groq",
-  label: "My Groq",
-  apiKey: "gsk_test_key_1234567890",
-  model: "llama-3.3-70b-versatile",
-  baseUrl: "https://api.groq.com/openai/v1",
-});
+/* The simple form only has a name (optional) and the API key: the preset
+ * supplies model and base URL unless "Change" opens the advanced fields. */
+assert.equal(doc.querySelector('form[data-form="ai-save"] [name="model"]'), null, "model must be hidden by default");
+assert.equal(doc.querySelector('form[data-form="ai-save"] [name="baseUrl"]'), null, "base URL must be hidden by default");
+assert.match(text(), /Model/, "the preset model should still be shown for reference");
+submit('form[data-form="ai-save"]', { provider: "groq", label: "My Groq", apiKey: "gsk_test_key_1234567890" });
+assert.equal(keys().connections[0].model, "llama-3.3-70b-versatile", "preset model must be applied");
+assert.equal(keys().connections[0].baseUrl, "https://api.groq.com/openai/v1", "preset base URL must be applied");
 let saved = keys();
 assert.ok(saved, "key must be stored");
 assert.equal(saved.connections.length, 1);
@@ -133,9 +134,30 @@ const extras = [
 for (const [provider, baseUrl, apiKey] of extras) {
   click('[data-action="ai-tab"][data-tab="keys"]');
   click('[data-action="ai-add"]');
-  submit('form[data-form="ai-save"]', { provider, apiKey, baseUrl, model: "m-" + provider });
+  change("#ai-provider", provider);   // the picker fills the preset defaults
+  submit('form[data-form="ai-save"]', { apiKey });   // key only — no model/URL needed
+  const added = keys().connections[keys().connections.length - 1];
+  assert.equal(added.provider, provider);
+  assert.equal(added.baseUrl, baseUrl, `${provider} must use its preset base URL`);
 }
+/* Perplexity is available as a first-class preset (visible in the picker). */
+click('[data-action="ai-tab"][data-tab="keys"]');
+const capReached = doc.querySelector('[data-action="ai-add"]') === null;
+if (capReached) {
+  click('[data-action="ai-remove"]');           // free a slot to see the picker
+}
+click('[data-action="ai-add"]');
+assert.match(markup(), /Perplexity/, "Perplexity must be offered in the provider picker");
+change("#ai-provider", "perplexity");
+submit('form[data-form="ai-save"]', { apiKey: "pplx-test-1234567890" });
+const pplx = keys().connections[keys().connections.length - 1];
+assert.equal(pplx.provider, "perplexity");
+assert.equal(pplx.baseUrl, "https://api.perplexity.ai", "Perplexity preset base URL");
+assert.equal(pplx.model, "sonar", "Perplexity preset model");
 assert.equal(keys().connections.length, 5, "five providers must be storable");
+
+/* Name is optional: a connection with no custom name falls back to the preset. */
+assert.ok(keys().connections.every((c) => c.label && c.label.length), "every connection needs a display name");
 
 /* The sixth is refused with the documented message. */
 click('[data-action="ai-tab"][data-tab="keys"]');
@@ -149,15 +171,17 @@ await settle();
 const activeId = keys().activeId;
 assert.notEqual(activeId, firstId, "Use must change the active provider");
 const switched = keys().connections.find((c) => c.id === activeId);
-assert.equal(switched.provider, "openai", "the second connection should now be active");
+assert.ok(switched, "the switched connection must exist");
+assert.notEqual(switched.id, firstId);
 
 calls.length = 0;
 click('[data-action="ai-tab"][data-tab="chat"]');
 submit('form[data-form="ai-send"]', { message: "Second question" });
 await settle();
 assert.equal(calls.length, 1);
-assert.match(calls[0].url, /api\.openai\.com/, "chat must call the switched provider");
-assert.match(calls[0].auth, /sk-test-openai-123456/, "the switched key must be used");
+const expectedUrl = switched.baseUrl.replace(/\/+$/, "") + "/chat/completions";
+assert.equal(calls[0].url, expectedUrl, "chat must call the switched provider");
+assert.equal(calls[0].auth, "Bearer " + switched.apiKey, "the switched key must be used");
 
 /* ------------------------------ remove a key ----------------------------- */
 click('[data-action="ai-tab"][data-tab="keys"]');

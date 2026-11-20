@@ -382,3 +382,15 @@ input[type="checkbox"] { width: auto; accent-color: var(--accent); }
 .chat-error { margin: 12px 0; border-color: var(--rose); }
 .chat-error strong { color: var(--rose); }
 .chat-form { margin-top: 14px; }
+/* Inline "Change" / text button used by the AI provider form. */
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
